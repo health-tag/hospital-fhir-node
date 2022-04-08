@@ -33,7 +33,7 @@ const AdminRegisterPage = () => {
         username: HN,
         custom_id: HN
       }
-      axios.post(`${process.env.REACT_APP_KONG_URL}:8000/admin-api/consumers/`,
+      axios.post(`${process.env.REACT_APP_KONG_URL}/admin-api/consumers/`,
         consumerData, 
         {
           auth: {
@@ -47,7 +47,7 @@ const AdminRegisterPage = () => {
           username: HN,
           password: pinCode
         }
-        axios.post(`${process.env.REACT_APP_KONG_URL}:8000/admin-api/consumers/${HN}/basic-auth`,
+        axios.post(`${process.env.REACT_APP_KONG_URL}/admin-api/consumers/${HN}/basic-auth`,
           setPasswordData, 
           {
             auth: {

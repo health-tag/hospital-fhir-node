@@ -22,7 +22,7 @@ const LoginPage = () => {
   };
 
   const getUserInfo = async () => {
-    axios.get(`${process.env.REACT_APP_KONG_URL}:8000/admin-api/consumers/${username}`,{
+    axios.get(`${process.env.REACT_APP_KONG_URL}/admin-api/consumers/${username}`,{
       auth: {
         username: username,
         password: password

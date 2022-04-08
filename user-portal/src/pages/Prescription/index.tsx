@@ -34,7 +34,7 @@ const PrescriptionPage = () => {
       navigate('/', { replace: true });
     }
     setHN(hn)
-    axios.get(`${process.env.REACT_APP_KONG_URL}:8000/fhir-api/Patient?identifier=https%3A%2F%2Fsil-th.org%2FCSOP%2Fhn%7C${hn}`, {
+    axios.get(`${process.env.REACT_APP_KONG_URL}/fhir-api/Patient?identifier=https%3A%2F%2Fsil-th.org%2FCSOP%2Fhn%7C${hn}`, {
       auth: {
         username: username,
         password: password
@@ -44,7 +44,7 @@ const PrescriptionPage = () => {
       const patientID = patientInfo.id
       setName(patientInfo.name[0].text)
       let prescriptions:Array<Prescription> = [];
-      axios.get(`${process.env.REACT_APP_KONG_URL}:8000/fhir-api/Patient/${patientID}/$everything?_format=json`, {
+      axios.get(`${process.env.REACT_APP_KONG_URL}/fhir-api/Patient/${patientID}/$everything?_format=json`, {
         auth: {
           username: username,
           password: password

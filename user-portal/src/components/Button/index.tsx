@@ -1,25 +1,47 @@
+import { LoadingIcon } from "@components/Icons";
+
 type Props = {
-  text: string;
+  mode?: "primary" | "secondary" | "danger";
+  type?: "submit" | "reset" | "button";
   isLoading?: boolean;
-  extraClass?: string;
-  onClick: Function;
-}
+  className?: string;
+  disabled?: boolean;
+  onClick?: Function;
+  children?: React.ReactNode;
+};
 
 const Button = (props: Props) => {
   const {
-    text,
+    mode = "",
+    type = "button",
+    children,
     isLoading,
-    extraClass,
-    onClick
+    className = "",
+    disabled = false,
+    onClick,
   } = props;
+
+  const handlerOnClick = () => {
+    if (onClick === undefined || onClick == null) return;
+    onClick();
+  };
 
   return (
     <button
-      className={`w-full bg-cyan-400 rounded p-2 text-black ${extraClass && extraClass}`}
-      onClick={() => onClick()}
+      className={`w-full ${mode} ${className} ${isLoading ? "working" : ""}`}
+      type={type}
+      disabled={disabled}
+      onClick={handlerOnClick}
     >
-      {isLoading ? 'Loading...' : text}
+      {isLoading ? (
+        <div className="flex items-center gap-2 justify-center">
+          <LoadingIcon spinning={true} />
+          <span>กำลังดำเนินการ</span>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 justify-center">{children}</div>
+      )}
     </button>
   );
-}
+};
 export default Button;

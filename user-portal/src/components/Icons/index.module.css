@@ -1,0 +1,31 @@
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-180deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
+.spinning {
+  animation: spin 1s ease-in-out 0s infinite;
+}
+
+.chevron {
+  @apply transition-all;
+
+  &.up {
+    transform: rotate(180deg);
+  }
+
+  &.left {
+    transform: rotate(90deg);
+  }
+
+  &.right {
+    transform: rotate(270deg);
+  }
+}

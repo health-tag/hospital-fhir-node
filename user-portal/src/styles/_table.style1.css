@@ -1,0 +1,30 @@
+@layer base {
+  table.table-style-1 {
+    @apply min-w-full table-auto w-full md:w-auto;
+    mix-blend-mode: multiply;
+
+    thead {
+      @apply border-b text-left bg-gray-100 text-gray-600;
+
+      th {
+        @apply text-sm font-medium p-3;
+      }
+    }
+
+    tbody {
+      @apply text-gray-900 p-3 bg-white;
+
+      tr {
+        @apply hover:bg-gray-200;
+      }
+
+      tr:nth-child(even) {
+        @apply bg-gray-100 hover:bg-gray-200;
+      }
+
+      td {
+        @apply text-sm  p-3;
+      }
+    }
+  }
+}

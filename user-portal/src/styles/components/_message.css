@@ -1,0 +1,19 @@
+.message-box {
+  @apply mb-8 px-4 py-3 rounded-md flex items-center;
+}
+
+.message-box.error {
+  @apply bg-red-100 border border-red-400 text-red-700;
+
+  svg{
+      @apply text-red-500;
+  }
+}
+
+.message-box.warning {
+    @apply bg-amber-100 border border-amber-400 text-amber-700;
+
+    svg{
+        @apply text-amber-500;
+    }
+  }

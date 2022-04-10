@@ -1,0 +1,168 @@
+@layer base {
+  .healthtag.console-root {
+    background-color: hsl(234deg, 34%, 18%);
+
+    > * > .sidebar {
+      .logo .logo-shadow {
+        background: rgba(255, 255, 255, 0.01);
+        border-radius: 50%;
+        box-shadow: 0px 0px 6px 0px rgba(255, 255, 255, 0.3) inset;
+      }
+      hr {
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 0 6px 0px rgba(255, 255, 255, 0.5);
+      }
+
+      nav a {
+      }
+
+      nav a.active {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.25);
+        box-shadow: 0 0 6px 0px rgba(255, 255, 255, 0.5);
+      }
+
+      nav a:hover,
+      nav a.active:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.35);
+        box-shadow: 0 0 6px 0px rgba(255, 255, 255, 0.6);
+      }
+    }
+
+    > * > .main-container > main {
+      background-color: hsl(234deg, 34%, 98%);
+    }
+
+    .modal {
+      background-color: hsl(234deg, 34%, 18%);
+    }
+  }
+
+  .notebook.console-root {
+    background: url("assets/images/leather_1.png"), hsla(15deg, 50%, 20%, 0.8);
+    background-repeat: repeat;
+    background-blend-mode: color-burn;
+
+    > * > .sidebar {
+      .logo .logo-shadow {
+        background: rgba(255, 255, 255, 0.01);
+        border-radius: 50%;
+        box-shadow: 0px 0px 6px 0px rgba(255, 255, 255, 0.3) inset;
+      }
+
+      .logo svg {
+        filter: drop-shadow(0px 0px 3px rgb(0, 0, 0, 0.6));
+      }
+      hr {
+        border-color: rgba(200, 200, 200, 0.5);
+        box-shadow: 0 0 6px 0px rgba(50, 50, 50, 0.5);
+      }
+
+      nav a {
+        @apply ml-6 mt-1 pl-2 rounded-l-xl shadow-lg transition-all;
+        background-image: url("assets/images/handmadepaper.png");
+        background-color: hsla(37deg, 97%, 48%, 0.9);
+        background-repeat: repeat;
+        background-blend-mode: multiply;
+      }
+
+      nav a + a {
+        @apply mb-1 mt-1;
+      }
+
+      nav a.active {
+        @apply ml-3 relative shadow-lg;
+        background-image: url("assets/images/handmadepaper.png");
+        background-color: hsla(17deg, 97%, 48%, 0.9);
+      }
+
+      nav a:hover {
+        @apply ml-3;
+        background: hsla(37deg, 97%, 58%, 0.9);
+      }
+
+      nav a.active:hover {
+        background-color: hsla(17deg, 97%, 58%, 0.9);
+      }
+    }
+
+    > * > .main-container > main {
+      background-image: url("assets/images/handmadepaper.png");
+      background-color: hsla(42deg, 100%, 95%, 0.7);
+      background-repeat: repeat;
+      background-blend-mode: luminosity;
+
+      .card {
+        @apply shadow-none  !important;
+        backdrop-filter: none;
+        background-image: url("assets/images/handmadepaper.png");
+        background-color: hsla(42deg, 100%, 93%, 1) !important;
+        background-blend-mode: multiply;
+      }
+    }
+
+    .modal {
+      background: url("assets/images/leather_1.png"), hsla(15deg, 50%, 20%, 0.8);
+      background-repeat: repeat;
+      background-blend-mode: color-burn;
+
+      .content-area {
+        mix-blend-mnode: multiply;
+      }
+
+      .button-area {
+        mix-blend-mode: multiply;
+      }
+    }
+  }
+
+  .console-root {
+    .page-h {
+      line-height: 2;
+    }
+
+    .page-h a {
+      @apply transition-all text-primary hover:text-secondary;
+    }
+
+    h3.page-h {
+      @apply mb-12;
+    }
+    h4.page-h {
+      @apply mb-6;
+    }
+    h5.page-h {
+      @apply mb-3;
+    }
+
+    h3.page-h:not(:first-child) {
+      @apply mt-14;
+    }
+    h4.page-h:not(:first-child) {
+      @apply mt-8;
+    }
+    h5.page-h:not(:first-child) {
+      @apply mt-6;
+    }
+
+    nav a.premium {
+      background: linear-gradient(
+        180deg,
+        hsl(44deg, 76%, 49%),
+        hsl(34deg, 79%, 36%)
+      ) !important;
+    }
+
+    nav a.premium:hover,
+    nav a.premium.active {
+      background: linear-gradient(
+        180deg,
+        hsl(44deg, 76%, 54%),
+        hsl(34deg, 79%, 41%)
+      ) !important;
+
+      box-shadow: 0 0 5px 0px hsl(44, 100%, 67%) !important;
+    }
+  }
+}

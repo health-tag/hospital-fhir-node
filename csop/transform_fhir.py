@@ -10,7 +10,12 @@ tran_items = {}
 disp_items = {}
 detail_items = {}
 
-base_fhir_url = 'http://hapi-fhir-jpaserver-start:8080/fhir'
+headers = {
+    'apikey': ''
+}
+base_fhir_url = 'http://localhost:8000/fhir-api-key-auth'
+# base_fhir_url = 'http://localhost:8000/fhir-api'
+hos_addr = '0xC88a594dBB4e9F1ce15d59D0ED129b92E6d89884'
 
 license_mapping = {
     'ว': {
@@ -96,7 +101,6 @@ with open(bill_trans, encoding="utf8") as xml_file:
             'pid': item_split[12],
             'name': item_split[13],
             'pay_plan': item_split[15],
-            'items': []
         }
         tran_items[item_data['inv_no']] = item_data
     # for item in bill_trans_items:
@@ -133,12 +137,13 @@ with open(bill_disp, encoding="utf8") as xml_file:
             'disp_date': item_split[6],
             'license_id': item_split[7],
             'disp_status': item_split[15],
-            'practitioner': license_mapping[item_split[7][0]]
+            'practitioner': license_mapping[item_split[7][0]],
+            'items': []
         }
         disp_items[item_data['disp_id']] = item_data
     for item in detail_disps:
         item_split = item.split('|')
-        item_data = {
+        item_details_data = {
             'disp_id':item_split[0],
             'product_cat': item_split[1],
             'local_drug_id': item_split[2],
@@ -152,14 +157,15 @@ with open(bill_disp, encoding="utf8") as xml_file:
             # 'multiple_disp': item_split[17],
             # 'supply_for': item_split[18],
         }
-        detail_items[item_data['disp_id']] = item_data
+        current_items = disp_items[item_details_data['disp_id']]['items']
+        current_items.append(item_details_data)
+        disp_items[item_details_data['disp_id']]['items'] = current_items
 
 combined_data = {}
-for disp_id, item in detail_items.items():
+for disp_id, info in disp_items.items():
     combined_data = {
-        **item,
-        **disp_items[disp_id],
-        **tran_items[disp_items[disp_id]['inv_no']]
+        **info,
+        **tran_items[info['inv_no']]
     }
     patient_identifiers = [
         {
@@ -169,11 +175,7 @@ for disp_id, item in detail_items.items():
         {
             "system": "https://sil-th.org/CSOP/hn",
             "value": f"{combined_data['hn']}"
-        },
-        # {
-        #     "system": "https://healthtag.io",
-        #     "value": "12345678"
-        # } 
+        }
     ]
     if combined_data['member_no'] != '':
         patient_identifiers.append({
@@ -182,90 +184,113 @@ for disp_id, item in detail_items.items():
         })
     sequence = 1
     claim_items = []
-    for bill_trans_item in combined_data['items']:
-        bill_item = {
-            "sequence": sequence,
-            "category": {
-                "coding": [
+    for detail_disp_item in info['items']:
+        item_combined_data = {
+            **combined_data,
+            **detail_disp_item
+        }
+        item_data = {
+            "fullUrl": f"urn:uuid:MedicationDispense/{item_combined_data['disp_id']}/{item_combined_data['local_drug_id']}",
+            "resource": {
+                "resourceType": "MedicationDispense",
+                "text": {
+                    "status": "extensions",
+                    "div": f"<div xmlns=\"http://www.w3.org/1999/xhtml\">Dispense ID: {item_combined_data['disp_id']} (HN: {item_combined_data['hn']})<p>{item_combined_data['dfs']} - {item_combined_data['instruction_text']}</p><p>QTY: {item_combined_data['quantity']} {item_combined_data['package_size']}</p></div>"
+                },
+                "extension": [
                     {
-                        "system": "https://sil-th.org/fhir/CodeSystem/csop-billMuad",
-                        "code": f"{bill_trans_item['bill_muad']}"
-                    }
-                ]
-            },
-            "productOrService": {
-                "coding": [
-                    {
-                        "system": "https://sil-th.org/CSOP/localCode",
-                        "code": f"{bill_trans_item['lc_code']}"
+                        "url": "https://sil-th.org/fhir/StructureDefinition/product-category",
+                        "valueCodeableConcept": {
+                            "coding": [
+                                {
+                                    "system": "https://sil-th.org/fhir/CodeSystem/csop-productCategory",
+                                    "code": f"{item_combined_data['product_cat']}"
+                                }
+                            ]
+                        }
                     },
+                    # **repeat_drug
+                ],
+                "identifier": [
                     {
-                        "system": "!?<<BILLTRAN.BillItems.BillMuad:System>>",
-                        "code": f"{bill_trans_item['std_code']}"
+                        "system": "https://sil-th.org/CSOP/dispenseId",
+                        "value": f"{item_combined_data['disp_id']}"
                     }
                 ],
-                "text":f"{bill_trans_item['desc']}"
-            },
-            "modifier": [
-                {
+                "status": f"{disp_status_mapping[item_combined_data['disp_status']]}",
+                "category": {
                     "coding": [
                         {
-                            "system": "https://sil-th.org/fhir/CodeSystem/csop-claimCont",
-                            "code": f"<<BILLDISP.DispensingItems.ClaimCont>>"
+                            "system": "http://terminology.hl7.org/fhir/CodeSystem/medicationdispense-category",
+                            "code": "outpatient"
                         }
                     ]
-                }
-            ],
-            "programCode": [
-                {
+                },
+                "medicationCodeableConcept": {
                     "coding": [
                         {
-                            "system": "https://sil-th.org/fhir/CodeSystem/csop-claimCat",
-                            "code": f"{bill_trans_item['claim_cat']}"
-                        }
-                    ]
-                }
-            ],
-            "servicedDate": f"{bill_trans_item['sv_date']}",
-            "quantity": {
-                "value": bill_trans_item['qty']
-            },
-            "unitPrice": {
-                "value": bill_trans_item['up'],
-                "currency": "THB"
-            },
-            "net": {
-                "value": bill_trans_item['charge_amt'],
-                "currency": "THB"
-            },
-            "extension": [
-                {
-                    "url": "https://sil-th.org/fhir/StructureDefinition/claim",
-                    "extension": [
-                        {
-                            "url": "unit",
-                            "valueMoney": {
-                                "value": bill_trans_item['charge_up'],
-                                "currency": "THB"
-                            }
+                            "system": "https://sil-th.org/CSOP/localCode",
+                            "code": f"{item_combined_data['local_drug_id']}"
                         },
                         {
-                            "url": "net",
-                            "valueMoney": {
-                                "value": bill_trans_item['claim_amt'],
-                                "currency": "THB"
+                            "system": "https://tmt.this.or.th",
+                            "code": f"{item_combined_data['standard_drug_id']}"
+                        }
+                    ],
+                    "text": f"{item_combined_data['dfs']}"
+                },
+                "subject": {
+                    "reference": f"urn:uuid:Patient/{h_code}/{item_combined_data['hn']}",
+                },
+                "context": {
+                    "reference": f"urn:uuid:Encounter/D/{item_combined_data['disp_id']}"
+                },
+               "performer": [
+                    {
+                        "actor": {
+                            "reference": f"urn:uuid:Organization/{hos_addr}"
+                        }
+                    }
+                ],
+                "quantity": {
+                    "value": item_combined_data['quantity'],
+                    "unit": f"{item_combined_data['package_size']}"
+                },
+                # "daysSupply": {
+                #     "value": !?<<BILLDISP.DispensedItem.SupplyFor:Number>>,
+                #     "unit": "!?<<BILLDISP.DispensedItem.SupplyFor:Unit>"
+                # },
+                "whenHandedOver": f"{item_combined_data['disp_date']}",
+                "dosageInstruction": [
+                    {
+                        "text": f"{item_combined_data['instruction_text']}",
+                        "timing": {
+                            "code": {
+                                "text": f"{item_combined_data['instruction_code']}"
                             }
                         }
-                    ]
-                }
-            ],
-            "encounter": [
-                {
-                    "reference": f"urn:uuid:Encounter/D/{combined_data['disp_id']}",
-                }
-            ]
+                    }
+                ],
+                # "substitution": {
+                #     "wasSubstituted": prd_code_flag[item_combined_data['prd_code']],
+                #     "type": {
+                #         "coding": [
+                #             {
+                #                 "system": "https://sil-th.org/fhir/CodeSystem/csop-substitutionAllowed",
+                #                 "code": f"{item_combined_data['prd_code']}"
+                #             }
+                #         ]
+                #     }
+                # }
+            },
+            "request": {
+                "method": "PUT",
+                "url": f"MedicationDispense?identifier=https://sil-th.org/CSOP/dispenseId|{item_combined_data['disp_id']}&code=https://sil-th.org/CSOP/localCode|{item_combined_data['local_drug_id']}",
+                "ifNoneExist": f"identifier=https://sil-th.org/CSOP/dispenseId|{item_combined_data['disp_id']}&code=https://sil-th.org/CSOP/localCode|{item_combined_data['local_drug_id']}",
+            }
         }
         sequence += 1
+        claim_items.append(item_data)
     # if 
     # repeat_drug = {
     #     "url": "https://sil-th.org/fhir/StructureDefinition/multiple-dispense",
@@ -308,7 +333,7 @@ for disp_id, item in detail_items.items():
         "type": "transaction",
         "entry": [
             {
-                "fullUrl": f"urn:uuid:Organization/{h_code}",
+                "fullUrl": f"urn:uuid:Organization/{hos_addr}",
                 "resource": {
                     "resourceType": "Organization",
                     "identifier": [
@@ -321,7 +346,7 @@ for disp_id, item in detail_items.items():
                 },
                 "request": {
                     "method": "PUT",
-                    "url": f"Organization/{h_code}",
+                    "url": f"Organization/{hos_addr}",
                     "ifNoneExist": f"identifier=https://bps.moph.go.th/hcode/5|{h_code}"
                 }
             },
@@ -349,7 +374,7 @@ for disp_id, item in detail_items.items():
                         }
                     ],
                     "managingOrganization": {
-                        "reference": f"urn:uuid:Organization/{h_code}"
+                        "reference": f"urn:uuid:Organization/{hos_addr}"
                     }
                 },
                 "request": {
@@ -384,7 +409,7 @@ for disp_id, item in detail_items.items():
                         }
                     ],
                     "managingOrganization": {
-                        "reference": f"urn:uuid:Organization/{h_code}"
+                        "reference": f"urn:uuid:Organization/{hos_addr}"
                     }
                 },
                 "request": {
@@ -393,35 +418,35 @@ for disp_id, item in detail_items.items():
                     "ifNoneExist": f"identifier=https://sil-th.org/CSOP/station|{combined_data['station']}"
                 }
             },
-            # {
-            #     "fullUrl": f"urn:uuid:Practitioner/{combined_data['practitioner']['type']}/{combined_data['license_id'][1:]}",
-            #     "resource": {
-            #         "resourceType": "Practitioner",
-            #         "text": {
-            #             "status": "extensions",
-            #             "div": f"<div xmlns=\"http://www.w3.org/1999/xhtml\">{combined_data['license_id']}</div>"
-            #         },
-            #         "identifier": [
-            #             {
-            #                 "type": {
-            #                     "coding": [
-            #                         {
-            #                             "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-            #                             "code": f"{combined_data['practitioner']['type']}"
-            #                         }
-            #                     ]
-            #                 },
-            #                 "system": f"{combined_data['practitioner']['system']}",
-            #                 "value": f"{combined_data['license_id'][1:]}"
-            #             }
-            #         ]
-            #     },
-            #     "request": {
-            #         "method": "PUT",
-            #         "url": f"Practitioner?identifier={h_code}|{combined_data['license_id'][1:]}",
-            #         "ifNoneExist": f"identifier={combined_data['practitioner']['system']}|{combined_data['license_id'][1:]}"
-            #     }
-            # },
+            {
+                "fullUrl": f"urn:uuid:Practitioner/{combined_data['practitioner']['type']}/{combined_data['license_id'][1:]}",
+                "resource": {
+                    "resourceType": "Practitioner",
+                    "text": {
+                        "status": "extensions",
+                        "div": f"<div xmlns=\"http://www.w3.org/1999/xhtml\">{combined_data['license_id']}</div>"
+                    },
+                    "identifier": [
+                        {
+                            "type": {
+                                "coding": [
+                                    {
+                                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                                        "code": f"{combined_data['practitioner']['type']}"
+                                    }
+                                ]
+                            },
+                            "system": f"{combined_data['practitioner']['system']}",
+                            "value": f"{combined_data['license_id'][1:]}"
+                        }
+                    ]
+                },
+                "request": {
+                    "method": "PUT",
+                    "url": f"Practitioner?identifier={combined_data['practitioner']['system']}|{combined_data['license_id'][1:]}",
+                    "ifNoneExist": f"identifier={combined_data['practitioner']['system']}|{combined_data['license_id'][1:]}"
+                }
+            },
             {
                 "fullUrl": f"urn:uuid:Encounter/D/{combined_data['disp_id']}",
                 "resource": {
@@ -465,7 +490,7 @@ for disp_id, item in detail_items.items():
                         "end": f"{combined_data['disp_date']}"
                     },
                     "serviceProvider": {
-                        "reference": f"urn:uuid:Organization/{h_code}"
+                        "reference": f"urn:uuid:Organization/{hos_addr}"
                     },
                 },
                 "request": {
@@ -474,111 +499,12 @@ for disp_id, item in detail_items.items():
                     "ifNoneExist": f"identifier=https://sil-th.org/CSOP/dispenseId|{combined_data['disp_id']}"
                 }
             },
-            {
-                "fullUrl": f"urn:uuid:MedicationDispense/{combined_data['disp_id']}/{combined_data['local_drug_id']}",
-                "resource": {
-                    "resourceType": "MedicationDispense",
-                    "text": {
-                        "status": "extensions",
-                        "div": f"<div xmlns=\"http://www.w3.org/1999/xhtml\">Dispense ID: {combined_data['disp_id']} (HN: {combined_data['hn']})<p>{combined_data['dfs']} - {combined_data['instruction_text']}</p><p>QTY: {combined_data['quantity']} {combined_data['package_size']}</p></div>"
-                    },
-                    "extension": [
-                        {
-                            "url": "https://sil-th.org/fhir/StructureDefinition/product-category",
-                            "valueCodeableConcept": {
-                                "coding": [
-                                    {
-                                        "system": "https://sil-th.org/fhir/CodeSystem/csop-productCategory",
-                                        "code": f"{combined_data['product_cat']}"
-                                    }
-                                ]
-                            }
-                        },
-                        # **repeat_drug
-                    ],
-                    "identifier": [
-                        {
-                            "system": "https://sil-th.org/CSOP/dispenseId",
-                            "value": f"{combined_data['disp_id']}"
-                        }
-                    ],
-                    "status": f"{disp_status_mapping[combined_data['disp_status']]}",
-                    "category": {
-                        "coding": [
-                            {
-                                "system": "http://terminology.hl7.org/fhir/CodeSystem/medicationdispense-category",
-                                "code": "outpatient"
-                            }
-                        ]
-                    },
-                    "medicationCodeableConcept": {
-                        "coding": [
-                            {
-                                "system": "https://sil-th.org/CSOP/localCode",
-                                "code": f"{combined_data['local_drug_id']}"
-                            },
-                            {
-                                "system": "https://tmt.this.or.th",
-                                "code": f"{combined_data['standard_drug_id']}"
-                            }
-                        ],
-                        "text": f"{combined_data['dfs']}"
-                    },
-                    "subject": {
-                        "reference": f"urn:uuid:Patient/{h_code}/{combined_data['hn']}",
-                    },
-                    "context": {
-                        "reference": f"urn:uuid:Encounter/D/{combined_data['disp_id']}"
-                    },
-                   "performer": [
-                        {
-                            "actor": {
-                                "reference": f"urn:uuid:Organization/{h_code}"
-                            }
-                        }
-                    ],
-                    "quantity": {
-                        "value": combined_data['quantity'],
-                        "unit": f"{combined_data['package_size']}"
-                    },
-                    # "daysSupply": {
-                    #     "value": !?<<BILLDISP.DispensedItem.SupplyFor:Number>>,
-                    #     "unit": "!?<<BILLDISP.DispensedItem.SupplyFor:Unit>"
-                    # },
-                    "whenHandedOver": f"{combined_data['disp_date']}",
-                    "dosageInstruction": [
-                        {
-                            "text": f"{combined_data['instruction_text']}",
-                            "timing": {
-                                "code": {
-                                    "text": f"{combined_data['instruction_code']}"
-                                }
-                            }
-                        }
-                    ],
-                    # "substitution": {
-                    #     "wasSubstituted": prd_code_flag[combined_data['prd_code']],
-                    #     "type": {
-                    #         "coding": [
-                    #             {
-                    #                 "system": "https://sil-th.org/fhir/CodeSystem/csop-substitutionAllowed",
-                    #                 "code": f"{combined_data['prd_code']}"
-                    #             }
-                    #         ]
-                    #     }
-                    # }
-                },
-                "request": {
-                    "method": "PUT",
-                    "url": f"MedicationDispense?identifier=https://sil-th.org/CSOP/dispenseId|{combined_data['disp_id']}&code=https://sil-th.org/CSOP/localCode|{combined_data['local_drug_id']}",
-                    "ifNoneExist": f"identifier=https://sil-th.org/CSOP/dispenseId|{combined_data['disp_id']}&code=https://sil-th.org/CSOP/localCode|{combined_data['local_drug_id']}",
-                }
-            }
         ]
     }
+    json_data['entry'].extend(claim_items)
     # print(json.dumps(json_data))
     # break
-    res = requests.post(base_fhir_url, json=json_data)
+    res = requests.post(base_fhir_url, json=json_data, headers=headers)
     print(res.status_code)
     print(res.content)
 

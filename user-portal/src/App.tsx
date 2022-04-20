@@ -1,30 +1,34 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-} from "react-router-dom";
+import React from "react";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 
-import LoginPage from './pages/Login';
-import PrescriptionPage from "./pages/Prescription";
-import AdminLoginPage from './pages/AdminLogin';
-import AdminRegisterPage from './pages/Register';
+import { AnimatePresence } from "framer-motion";
+import AdminLoginPage from "@pages/Administrator/Login";
+import AdminConsolePage from "@pages/Administrator/Console/Layout";
+import LoginPage from "@pages/User/Login";
+import UserConsolePage from "@pages/User/Console/Layout";
 
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+export const AppStateContext = React.createContext({
+  isSideBarOpen: window.matchMedia("(min-width: 768px)").matches,
+  theme: localStorage.getItem("SelectedTheme") ?? "healthtag",
+  switchTheme: (themeKey: string) => {},
+});
 
 function App() {
+  const location = useLocation();
+
   return (
     <>
-      <BrowserRouter>
-        <Routes>
-          
-          <Route path="/admin" element={<AdminLoginPage />} />
-          <Route path="/admin/register" element={<AdminRegisterPage />} />
-          <Route path="/prescription" element={<PrescriptionPage />} />
-          <Route path="/" element={<LoginPage />} />
+      <AnimatePresence exitBeforeEnter>
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<Navigate to="/user/login" replace />} />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/user/login" element={<LoginPage />} />
         </Routes>
-      </BrowserRouter>
+      </AnimatePresence>
+      <Routes>
+        <Route path="/admin/console/*" element={<AdminConsolePage />} />
+        <Route path="/user/console/*" element={<UserConsolePage />} />
+      </Routes>
     </>
   );
 }

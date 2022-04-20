@@ -1,0 +1,19 @@
+@layer base {
+  :root {
+    --primary-color: hsl(234deg, 34%, 41%);
+    --secondary-color: hsl(198deg, 79%, 36%);
+  }
+
+  /* This is required for CSS gradient animation*/
+  @property --primary-color-prop {
+    syntax: "<color>";
+    initial-value: hsl(198deg, 79%, 36%);
+    inherits: false;
+  }
+
+  @property --secondary-color-prop {
+    syntax: "<color>";
+    initial-value: hsl(234deg, 34%, 41%);
+    inherits: false;
+  }
+}

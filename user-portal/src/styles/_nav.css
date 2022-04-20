@@ -1,0 +1,24 @@
+.sidebar {
+  h5 {
+    @apply font-bold;
+    user-select: none;
+    z-index: 0;
+  }
+
+  nav a {
+    @apply py-3 pl-5 pr-3 transition-all text-white flex gap-6 items-center cursor-pointer border-y-[1px];
+    user-select: none;
+    border-color: transparent;
+    z-index: 1;
+  }
+}
+
+.dropdown {
+  @apply absolute top-full right-0 rounded-lg bg-glass min-w-full p-3 shadow-lg z-30;
+
+  a {
+    @apply px-3 transition-all flex gap-3 items-center cursor-pointer text-primary hover:text-secondary whitespace-nowrap;
+    user-select: none;
+    z-index: 1;
+  }
+}

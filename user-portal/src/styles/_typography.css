@@ -1,0 +1,44 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@200;400;600&family=Nunito:ital,wght@0,200;0,400;0,600;1,200;1,400;1,600&family=Sarabun:ital,wght@0,200;0,400;0,600;1,200;1,400;1,600&display=swap");
+@layer base {
+  h1 {
+    font-size: calc(0.75 * 3.052rem);
+  }
+
+  h2 {
+    font-size: calc(0.75 * 2.441rem);
+  }
+
+  h3 {
+    font-size: calc(0.75 * 1.953rem);
+  }
+
+  h4 {
+    font-size: calc(0.75 * 1.563rem);
+  }
+
+  h5 {
+    font-size: calc(0.85 * 1.25rem);
+  }
+
+  @media screen and (min-width: 1024px) {
+    h1 {
+      font-size: 3.052rem;
+    }
+
+    h2 {
+      font-size: 2.441rem;
+    }
+
+    h3 {
+      font-size: 1.953rem;
+    }
+
+    h4 {
+      font-size: 1.563rem;
+    }
+
+    h5 {
+      font-size: 1.25rem;
+    }
+  }
+}

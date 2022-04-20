@@ -1,0 +1,22 @@
+.container {
+  display: grid;
+  grid-template:
+    "header header" auto
+    "sidebar main" 1fr / auto minmax(0, 1fr);
+}
+
+.header {
+  grid-area: header;
+}
+
+.sidebar {
+  grid-area: sidebar;
+}
+
+.main {
+  grid-area: main;
+}
+
+.edition {
+  @apply font-bold;
+}

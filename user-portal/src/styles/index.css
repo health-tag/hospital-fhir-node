@@ -1,0 +1,177 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+@import "_vars.css";
+@import "_typography.css";
+@import "_input.css";
+@import "_nav.css";
+@import "_table.style1.css";
+/* Import components */
+@import "components/_placeholder.css";
+@import "components/_message.css";
+/* Import theming */
+@import "_console.css";
+
+@layer base {
+  body {
+    @apply text-gray-700;
+    font-family: "Nunito", "Sarabun", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+      monospace;
+  }
+
+  .mdx h1:not(:first-child),
+  .mdx h2:not(:first-child),
+  .mdx h3:not(:first-child),
+  .mdx h4:not(:first-child),
+  .mdx h5:not(:first-child) {
+    @apply mt-6 mb-3;
+  }
+
+  .mdx ol li + li {
+    @apply mt-4;
+  }
+
+  .mdx p {
+    line-height: 1.75;
+  }
+
+  .mdx p + p {
+    @apply mt-4;
+  }
+
+  .mdx ol {
+    @apply ml-6;
+  }
+
+  .mdx ol {
+    list-style: decimal;
+  }
+
+  .mdx ul {
+    list-style: disc;
+  }
+}
+
+@layer utilities {
+  .bg-glass {
+    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .text-primary {
+    color: var(--primary-color);
+  }
+
+  .text-secondary {
+    color: var(--secondary-color);
+  }
+
+  .bg-primary {
+    background-color: var(--primary-color);
+  }
+
+  .bg-secondary {
+    background-color: var(--secondary-color);
+  }
+
+  .bg-secondary-light-5\.5 {
+    background-color: hsl(198deg, 79%, 96%);
+  }
+
+  .bg-premier-gradient {
+    background: linear-gradient(
+      90deg,
+      hsl(44deg, 76%, 49%),
+      hsl(34deg, 79%, 36%)
+    );
+  }
+
+  .bg-primary-gradient {
+    background: linear-gradient(
+      90deg,
+      var(--primary-color),
+      var(--secondary-color)
+    );
+  }
+
+  .bg-primary-gradient-light-1 {
+    background: linear-gradient(
+      90deg,
+      hsl(198deg, 79%, 46%),
+      hsl(234deg, 34%, 51%)
+    );
+  }
+
+  .bg-primary-gradient-light-2 {
+    background: linear-gradient(
+      90deg,
+      hsl(198deg, 79%, 56%),
+      hsl(234deg, 34%, 61%)
+    );
+  }
+
+  .bg-primary-gradient-light-3 {
+    background: linear-gradient(
+      90deg,
+      hsl(198deg, 79%, 66%),
+      hsl(234deg, 34%, 71%)
+    );
+  }
+
+  .bg-primary-gradient-light-4 {
+    background: linear-gradient(
+      90deg,
+      hsl(198deg, 79%, 76%),
+      hsl(234deg, 34%, 81%)
+    );
+  }
+
+  .bg-primary-gradient-light-4\.5 {
+    background: linear-gradient(
+      90deg,
+      hsl(198deg, 79%, 81%),
+      hsl(234deg, 34%, 86%)
+    );
+  }
+
+  .bg-primary-gradient-light-5 {
+    background: linear-gradient(
+      90deg,
+      hsl(198deg, 79%, 86%),
+      hsl(234deg, 34%, 91%)
+    );
+  }
+
+  .bg-primary-gradient-light-5\.5 {
+    background: linear-gradient(
+      90deg,
+      hsl(198deg, 79%, 91%),
+      hsl(234deg, 34%, 96%)
+    );
+  }
+
+  .bg-primary-gradient-light-login {
+    background: radial-gradient(
+      circle at -15%,
+      hsl(198deg, 79%, 97%),
+      hsl(234deg, 34%, 97%)
+    );
+  }
+
+  .shadow-card {
+    --tw-shadow: 0 2px 4px 1px rgb(0 0 0 / 0.05);
+    --tw-shadow-colored: 0 2px 4px 1px var(--tw-shadow-color);
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+      var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+  }
+
+  .card {
+    @apply rounded-lg  bg-glass overflow-hidden shadow-card;
+  }
+}

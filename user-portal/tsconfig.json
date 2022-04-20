@@ -1,11 +1,17 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "target": "es2018",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "baseUrl": "src",
+    "paths": {
+      "@animations/*": ["animations/*"],
+      "@pages/*": ["pages/*"],
+      "@utilities/*": ["utilities/*"],
+      "@components/*": ["components/*"],
+      "@hooks/*": ["hooks/*"],
+      "@assets/*": ["assets/*"],
+      "@layouts/*": ["layouts/*"]
+    },
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -18,9 +24,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    "noImplicitAny": false,
     "jsx": "react-jsx"
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src/**/*"]
 }

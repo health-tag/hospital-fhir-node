@@ -10,11 +10,9 @@ import { AnimatePresence, motion } from "framer-motion";
 
 import MainLayout from "@layouts/main";
 import {
-  BookOpenIcon,
   ChevronIcon,
   CogIcon,
   KeyIcon,
-  NfcIcon,
   PremiumIcon,
   SupportIcon,
   UserGroupIcon,
@@ -81,8 +79,8 @@ const AdminConsolePage = () => {
             การสนับสนุน
           </motion.h5>
           <a href="https://healthtag.io/support">
-            <BookOpenIcon />
-            คู่มือการใช้งาน
+            <SupportIcon />
+            คู่มือ + การช่วยเหลือ
           </a>
           <hr />
           <motion.h5 variants={menuHeaderAnimationVariants}>

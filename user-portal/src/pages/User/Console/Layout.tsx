@@ -14,7 +14,6 @@ import {
   menuHeaderAnimationVariants,
 } from "@animations/variants";
 import {
-  BookOpenIcon,
   ChevronIcon,
   CogIcon,
   KeyIcon,
@@ -104,13 +103,9 @@ const UserConsolePage = () => {
           <motion.h5 variants={menuHeaderAnimationVariants}>
             การสนับสนุน
           </motion.h5>
-          <a>
-            <BookOpenIcon />
-            คู่มือการใช้งาน
-          </a>
-          <a>
+          <a href="https://healthtag.io/support">
             <SupportIcon />
-            ขอรับความช่วยเหลือ
+            คู่มือ + การช่วยเหลือ
           </a>
           <hr />
           <motion.h5 variants={menuHeaderAnimationVariants}>

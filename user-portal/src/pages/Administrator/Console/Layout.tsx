@@ -4,6 +4,7 @@ import {
   Route,
   NavLink,
   Navigate,
+  useNavigate,
 } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -26,8 +27,10 @@ import SettingPage from "@pages/Setting";
 import { useEffect, useRef, useState } from "react";
 import PersonManagerPage from "./PersonManager";
 import AdminRegisterPage from "./PersonManager/Register";
+import AdminResetPinPage from "./PersonManager/ResetPin";
 
 const AdminConsolePage = () => {
+  const navigate = useNavigate();
   const location = useLocation();
   const profileDropDownRef = useRef<HTMLDivElement>(null);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>();
@@ -47,6 +50,18 @@ const AdminConsolePage = () => {
     };
   });
 
+  useEffect(() => {
+    if (!sessionStorage.getItem("admin_username")) {
+      navigate("/admin/login");
+    }
+  }, []);
+
+  const logout = () => {
+    sessionStorage.removeItem("admin_username");
+    sessionStorage.removeItem("admin_password");
+    navigate("/admin/login");
+  };
+
   return (
     <MainLayout
       title="ศูนย์จัดการระบบ"
@@ -60,14 +75,7 @@ const AdminConsolePage = () => {
             <UserGroupIcon />
             จัดการผู้ใช้งาน
           </NavLink>
-          <NavLink to="manage-tags">
-            <NfcIcon />
-            จัดการ NFC Tag
-          </NavLink>
-          <a className="premium">
-            <PremiumIcon />
-            พรีเมี่ยม
-          </a>
+
           <hr />
           <motion.h5 variants={menuHeaderAnimationVariants}>
             การสนับสนุน
@@ -88,6 +96,10 @@ const AdminConsolePage = () => {
             <CogIcon />
             ตั้งค่าระบบ
           </NavLink>
+          <a className="premium">
+            <PremiumIcon />
+            อัพเกรด
+          </a>
         </>
       }
       header={
@@ -101,7 +113,8 @@ const AdminConsolePage = () => {
               className="p-3 hover:cursor-pointer flex items-center text-white gap-6"
               onClick={() => setIsProfileOpen(!isProfileOpen)}
             >
-              Test <ChevronIcon side={isProfileOpen ? "up" : "down"} />
+              {sessionStorage.getItem("admin_username")}{" "}
+              <ChevronIcon side={isProfileOpen ? "up" : "down"} />
             </div>
             <AnimatePresence>
               {isProfileOpen ? (
@@ -113,9 +126,9 @@ const AdminConsolePage = () => {
                   key="profile-dropdown"
                   className={`dropdown flex flex-col gap-3`}
                 >
-                  <NavLink to="/admin/login">
+                  <a onClick={logout}>
                     <KeyIcon /> ออกจากระบบ
-                  </NavLink>
+                  </a>
                 </motion.nav>
               ) : (
                 <></>
@@ -132,6 +145,10 @@ const AdminConsolePage = () => {
           <Route
             path="manage-people/register"
             element={<AdminRegisterPage />}
+          />{" "}
+          <Route
+            path="manage-people/reset-pin"
+            element={<AdminResetPinPage />}
           />
           <Route path="setting" element={<SettingPage />} />
         </Routes>

@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { useIsScreenLg } from "@hooks/useMediaQuery";
 import HLogo from "@assets/logo/logo_horizontal_white.svg";
 import style from "./login.module.css";
-import Bg from "@assets/images/login-bg.svg";
 import { loginAnimationVariants } from "@animations/variants";
 
 
@@ -14,7 +13,6 @@ const SmallCenterDialogLayout = ({
   const isScreenLg = useIsScreenLg();
   return (
     <div className="w-screen min-h-screen bg-primary-gradient-light-5.5">
-      <img className="absolute w-full h-full object-cover" src={Bg} />
       <div className="min-h-screen flex flex-col items-center justify-center p-6 md:p-12 relative z-10">
         <motion.main
           custom={isScreenLg}

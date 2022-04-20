@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ReactComponent as Logo } from "@assets/logo/icon.svg";
+import MIcon from "@assets/logo/icon.png";
 import React, { useState, useContext } from "react";
 
 import HLogo from "@assets/logo/logo_horizontal_white.svg";
@@ -51,7 +51,7 @@ const MainLayout = ({
         >
           <div className="logo flex items-center w-[240px]">
             <div className="relative">
-              <Logo className="h-16 w-16 p-3" />
+              <img src={MIcon} className="h-16 w-16 p-3" />
               <div className="logo-shadow absolute w-10 h-10 left-3 top-3"></div>
             </div>
             {title}

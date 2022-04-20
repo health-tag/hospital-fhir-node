@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation, NavLink } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 import axios from "axios";
 
 import Input from "@components/Input";
 import Button from "@components/Button";
 
-import Logo from "@assets/logo/logo-main.png";
 import {
   AcceptIcon,
   ChevronIcon,
-  HospitalIcon,
+  PasswordResetIcon,
   UserAddIcon,
   UserGroupIcon,
 } from "@components/Icons";
@@ -20,7 +19,7 @@ import { Form } from "@components/Form";
 
 type RegisterData = { hospitalNumber: ""; pinCode: ""; pinCodeVerify: "" };
 
-const AdminRegisterPage = () => {
+const AdminResetPinPage = () => {
   const navigate = useNavigate();
   const [alertModalData, setAlertModalData] = useState<{
     hospitalNumber: string;
@@ -55,14 +54,12 @@ const AdminRegisterPage = () => {
     const adminPassword = sessionStorage.getItem("admin_password")!;
     if (isValid) {
       try {
-        // Register user
-        const consumerData = {
-          username: registerData.hospitalNumber,
-          custom_id: registerData.hospitalNumber,
+        // Get user information
+        const setPasswordData = {
+          password: registerData.pinCode,
         };
-        await axios.post(
-          `${process.env.REACT_APP_KONG_URL}/admin-api/consumers/`,
-          consumerData,
+        var response = await axios.get(
+          `${process.env.REACT_APP_KONG_URL}/admin-api/consumers/${registerData.hospitalNumber}/basic-auth`,
           {
             auth: {
               username: adminUsername,
@@ -70,13 +67,10 @@ const AdminRegisterPage = () => {
             },
           }
         );
+        
         // Set user password
-        const setPasswordData = {
-          username: registerData.hospitalNumber,
-          password: registerData.pinCode,
-        };
-        await axios.post(
-          `${process.env.REACT_APP_KONG_URL}/admin-api/consumers/${registerData.hospitalNumber}/basic-auth`,
+        await axios.put(
+          `${process.env.REACT_APP_KONG_URL}/admin-api/consumers/${registerData.hospitalNumber}/basic-auth/${registerData.hospitalNumber}`,
           setPasswordData,
           {
             auth: {
@@ -127,8 +121,8 @@ const AdminRegisterPage = () => {
           จัดการผู้ใช้งาน
         </NavLink>
         <ChevronIcon side="right" className="h-8 w-8 inline-block" />
-        <UserAddIcon className="h-8 w-8 inline-block mr-3 " />
-        ลงทะเบียนผู้รับบริการ
+        <PasswordResetIcon className="h-8 w-8 inline-block mr-3 " />
+        รีเซ็ท PIN ของผู้ใช้งาน
       </h3>
       <Form
         className="card p-6"
@@ -152,7 +146,7 @@ const AdminRegisterPage = () => {
           setValue={(val: string) => setPinCode(val.trim().replace(/\D/, ""))}
           required
           validator={pinValidator}
-          label="รหัสตัวเลข (PIN) สำหรับผู้รับบริการเข้าสู่ระบบ"
+          label="ตั้งรหัสตัวเลข (PIN) ใหม่ สำหรับผู้รับบริการเข้าสู่ระบบ"
           inputMode="numeric"
           placeholder="PIN 6 หลัก"
           maxLength={6}
@@ -168,7 +162,7 @@ const AdminRegisterPage = () => {
             setPinCodeVerify(val.trim().replace(/\D/, ""))
           }
           validator={pinVerifyValidator}
-          label="ยืนยันรหัสตัวเลข (PIN) สำหรับผู้รับบริการเข้าสู่ระบบ"
+          label="ยืนยันรหัสตัวเลข (PIN) ใหม่ สำหรับผู้รับบริการเข้าสู่ระบบ"
           required
           inputMode="numeric"
           placeholder="ใส่ PIN 6 หลัก อีกครั้ง"
@@ -200,15 +194,14 @@ const AdminRegisterPage = () => {
                 onClick={() => setAlertModalData(null)}
               >
                 <UserAddIcon />
-                ลงทะเบียนผู้ใช้งานอื่นต่อ
+                รีเซ็ท PIN คนอื่นต่อ
               </Button>
             </>
           }
           title="สำเร็จ"
         >
           <p>
-            เพิ่มผู้ใช้งานที่มีหมายเลขประจำตัวผู้ป่วย{" "}
-            {alertModalData.hospitalNumber} เรียบร้อยแล้ว
+            ทำการรีเซ็ท PIN ของ {alertModalData.hospitalNumber} เรียบร้อยแล้ว
           </p>
         </Modal>
       )}
@@ -230,4 +223,4 @@ const AdminRegisterPage = () => {
     </motion.div>
   );
 };
-export default AdminRegisterPage;
+export default AdminResetPinPage;

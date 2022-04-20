@@ -1,4 +1,6 @@
-import { ChangeEvent, useState } from "react";
+import { FormContext, ValidationBuilder } from "@components/Form";
+import { nameof } from "@utilities/ts";
+import { ChangeEvent, useContext, useEffect, useState } from "react";
 
 const Input = ({
   id = Math.random()
@@ -15,15 +17,14 @@ const Input = ({
   inputClassName = "",
   setValue,
   validator,
+  forceRevalidate,
   ...otherProps
 }: {
   id?: string;
-  name?: string;
+  name: string;
   label?: string;
   type?: string;
   required?: boolean;
-  invalid?: boolean;
-  invalidText?: string;
   placeholder?: string;
   value: string;
   className?: string;
@@ -31,13 +32,13 @@ const Input = ({
   setValue: Function;
   validator?: (value: string) => {
     result: boolean;
-    validationMessage?: string;
+    message?: string;
   };
+  forceRevalidate?:number;
   [x: string]: any;
 }) => {
+  const formContext = useContext(FormContext);
   const [firstTimeRender, setFirstTimeRender] = useState<boolean>(true);
-  const [isInvalid, setIsInvalid] = useState<boolean>(false);
-  const [validationMessage, setValidationMessage] = useState<string>("");
 
   const onChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
     setFirstTimeRender(false);
@@ -46,12 +47,28 @@ const Input = ({
   };
 
   const validatorHandler = (value: string) => {
-    if (validator !== undefined) {
-      const { result, validationMessage } = validator(value);
-      setIsInvalid(!result);
-      setValidationMessage(validationMessage ?? "");
+    const builder = new ValidationBuilder();
+    if (required && value === "") {
+      builder.addValidation(name, false, "จำเป็นต้องใส่");
+    } else if (validator !== undefined) {
+      const { result, message } = validator(value);
+      builder.addValidation(name, result);
+      if (!result) {
+        builder.addValidation(name, result, message!);
+      }
+    } else {
+      builder.addValidation(name, true);
     }
+    formContext.setValidation(builder.build());
   };
+
+  useEffect(() => {
+    validatorHandler(value);
+  }, []);
+
+  useEffect(() => {
+    validatorHandler(value);
+  }, [forceRevalidate]);
 
   return (
     <div className={className}>
@@ -61,9 +78,11 @@ const Input = ({
       <input
         id={id}
         name={name}
-        className={`w-full p-2 rounded ${inputClassName} ${
-          isInvalid ? "required" : ""
-        } ${required && !firstTimeRender && value === "" ? "required" : ""}`}
+        className={` ${inputClassName} ${
+          !formContext.validations[name]?.valid && !firstTimeRender
+            ? "required"
+            : ""
+        } `}
         type={type ? type : "text"}
         placeholder={placeholder}
         value={value}
@@ -71,11 +90,11 @@ const Input = ({
         {...otherProps}
       />
       <div className="text-sm pt-1">
-        {" "}
-        {required && !firstTimeRender && value === "" && (
-          <span className="text-red-400">*จำเป็นต้องใส่</span>
-        )}{" "}
-        {isInvalid && <span className="text-red-400">{validationMessage}</span>}
+        {!formContext.validations[name]?.valid && !firstTimeRender && (
+          <span className="text-red-400">
+            {formContext.validations[name]?.messages.join(" ")}
+          </span>
+        )}
       </div>
     </div>
   );

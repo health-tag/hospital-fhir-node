@@ -98,7 +98,7 @@
   input[type="date"],
   input[type="password"],
   select {
-    @apply outline-none border-2 focus:border-[#1379A6] transition-all;
+    @apply w-full p-2 rounded outline-none border-2 focus:border-[#1379A6] transition-all;
   }
 
   input[type="date"] {

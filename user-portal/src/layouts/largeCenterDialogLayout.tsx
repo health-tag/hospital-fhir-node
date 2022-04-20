@@ -1,5 +1,4 @@
 import { ReactComponent as HLogo } from "@assets/logo/logo_horizontal.svg";
-import Bg from "@assets/images/login-bg.svg";
 import {  motion } from "framer-motion";
 import { dialogAnimationVariants } from "@animations/variants";
 
@@ -20,7 +19,6 @@ const LargeCenterDialogLayout = ({
         limitHeightToScreen ? "h-screen" : "min-h-screen"
       } w-screen bg-primary-gradient-light-5.5`}
     >
-      <img className="absolute w-full h-full object-cover" src={Bg} />
       <div
         className={`${className} p-6 md:p-12 ${
           limitHeightToScreen ? "h-screen" : "min-h-screen"

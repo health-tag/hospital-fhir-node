@@ -7,7 +7,7 @@ export const Message = ({
   title: string;
   type: "error" | "warning";
   children?: React.ReactNode;
-  onClose?: () => {};
+  onClose?: () => void;
 }) => {
   return (
     <div className={`message-box ${type}`} role="alert">

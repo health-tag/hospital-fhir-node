@@ -80,13 +80,9 @@ const AdminConsolePage = () => {
           <motion.h5 variants={menuHeaderAnimationVariants}>
             การสนับสนุน
           </motion.h5>
-          <a>
+          <a href="https://healthtag.io/support">
             <BookOpenIcon />
             คู่มือการใช้งาน
-          </a>
-          <a>
-            <SupportIcon />
-            ขอรับความช่วยเหลือ
           </a>
           <hr />
           <motion.h5 variants={menuHeaderAnimationVariants}>
@@ -96,7 +92,7 @@ const AdminConsolePage = () => {
             <CogIcon />
             ตั้งค่าระบบ
           </NavLink>
-          <a className="premium">
+          <a className="premium" href="https://healthtag.io/upgrade">
             <PremiumIcon />
             อัพเกรด
           </a>

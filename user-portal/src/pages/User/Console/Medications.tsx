@@ -81,13 +81,6 @@ const MedicationsPage = () => {
                 prescriptions.push(data);
               }
             }
-            // FAKE DATA
-            prescriptions.push({
-              displayText: "Paracetamol",
-              dosageInstruction: "1 tab oral prn q 6hr",
-              whenHandedOver: "2012-11-04T14:51:06.157Z",
-              quantity: { value: 50, unit: "tablets" },
-            });
 
             setPrescriptionList(prescriptions);
           });

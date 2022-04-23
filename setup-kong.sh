@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo -e "Creating service FHIR..."
-curl --location -g -k --request POST 'http://localhost:8001/services' \
+curl --location -g -s -k --request POST 'http://localhost:8001/services' \
   --header 'Content-Type: application/json' \
   --data-raw '{
     "name": "fhir-api",
@@ -9,7 +9,7 @@ curl --location -g -k --request POST 'http://localhost:8001/services' \
   }'
 
 echo -e "\nCreating FHIR API route..."
-curl --location -g -k --request POST 'http://localhost:8001/routes' \
+curl --location -g -s -k --request POST 'http://localhost:8001/routes' \
   --header 'Content-Type: application/json' \
   --data-raw '{
     "name": "fhir-api-route",
@@ -20,7 +20,7 @@ curl --location -g -k --request POST 'http://localhost:8001/routes' \
   }'
 
 echo -e "\nEnabling plugin basic auth plugin on FHIR API"
-curl --location -g -k --request POST 'http://localhost:8001/services/fhir-api/plugins' \
+curl --location -g -s -k --request POST 'http://localhost:8001/services/fhir-api/plugins' \
   --header 'Content-Type: application/json' \
   --data-raw '{
     "name": "basic-auth",
@@ -31,7 +31,7 @@ curl --location -g -k --request POST 'http://localhost:8001/services/fhir-api/pl
   }'
 
 echo -e "\nEnabling plugin cors plugin on FHIR API"
-curl --location -g -k --request POST 'http://localhost:8001/services/fhir-api/plugins' \
+curl --location -g -s -k --request POST 'http://localhost:8001/services/fhir-api/plugins' \
   --header 'Content-Type: application/json' \
   --data-raw '{
     "name": "cors",
@@ -43,7 +43,7 @@ curl --location -g -k --request POST 'http://localhost:8001/services/fhir-api/pl
   }'
 
 echo -e "Creating service Admin..."
-curl --location -g -k --request POST 'http://localhost:8001/services' \
+curl --location -g -s -k --request POST 'http://localhost:8001/services' \
   --header 'Content-Type: application/json' \
   --data-raw '{
     "name": "admin-api",
@@ -51,7 +51,7 @@ curl --location -g -k --request POST 'http://localhost:8001/services' \
   }'
 
 echo -e "\nCreating route..."
-curl --location -g -k --request POST 'http://localhost:8001/routes' \
+curl --location -g -s -k --request POST 'http://localhost:8001/routes' \
   --header 'Content-Type: application/json' \
   --data-raw '{
     "name": "admin-api-route",
@@ -62,7 +62,7 @@ curl --location -g -k --request POST 'http://localhost:8001/routes' \
   }'
 
 echo -e "\nEnabling plugin basic auth plugin"
-curl --location -g -k --request POST 'http://localhost:8001/services/admin-api/plugins' \
+curl --location -g -s -k --request POST 'http://localhost:8001/services/admin-api/plugins' \
   --header 'Content-Type: application/json' \
   --data-raw '{
     "name": "basic-auth",
@@ -73,7 +73,7 @@ curl --location -g -k --request POST 'http://localhost:8001/services/admin-api/p
   }'
 
 echo -e "\nEnabling plugin cors plugin"
-curl --location -g -k --request POST 'http://localhost:8001/services/admin-api/plugins' \
+curl --location -g -s -k --request POST 'http://localhost:8001/services/admin-api/plugins' \
   --header 'Content-Type: application/json' \
   --data-raw '{
     "name": "cors",
@@ -82,4 +82,31 @@ curl --location -g -k --request POST 'http://localhost:8001/services/admin-api/p
       "headers": ["*"],
       "exposed_headers": ["*"]
     }
+  }'
+
+echo -e "Creating service FHIR..."
+curl --location -g -s -k --request POST 'http://localhost:8001/services' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+    "name": "fhir-api-key-auth",
+    "url": "http://hapi-fhir-jpaserver-start:8080/fhir"
+  }'
+
+echo -e "\nCreating FHIR API route..."
+curl --location -g -s -k --request POST 'http://localhost:8001/routes' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+    "name": "fhir-api-key-auth-route",
+    "service": {
+      "name": "fhir-api-key-auth"
+    },
+    "paths": ["/fhir-api-key-auth"]
+  }'
+
+echo -e "\nEnabling plugin key auth plugin on FHIR API"
+curl --location -g -s -k --request POST 'http://localhost:8001/services/fhir-api-key-auth/plugins' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+    "name": "key-auth",
+    "protocols": ["http", "https"]
   }'

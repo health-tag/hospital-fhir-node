@@ -1,5 +1,15 @@
 version: "3"
 services:
+  upload:
+    image: filebrowser/filebrowser:s6
+    container_name: upload
+    ports:
+      - "8888:80"
+    networks:
+      - hapi-fhir-network
+    volumes:
+      - ./csop/uploads:/srv
+
   web:
     build:
       context: user-portal/
@@ -11,22 +21,14 @@ services:
     networks:
       - hapi-fhir-network
 
-  upload:
-    image: filebrowser/filebrowser:s6
-    container_name: upload
-    ports:
-      - "8888:80"
-    networks:
-      - hapi-fhir-network
-    volumes:
-      - ./csop/uploads:/srv
-
   hapi-fhir-jpaserver-start:
     image: "hapiproject/hapi:latest"
     container_name: hapi-fhir-jpaserver-start
     volumes:
       - ./hapi-fhir-server:/data/hapi
     restart: on-failure
+    expose:
+      - 8080
     networks:
       - hapi-fhir-network
 

@@ -1,4 +1,4 @@
-@layer base {
+@layer components {
   table.table-style-1 {
     @apply min-w-full table-auto w-full md:w-auto;
     mix-blend-mode: multiply;
@@ -24,6 +24,7 @@
 
       td {
         @apply text-sm  p-3;
+        word-break: break-word;
       }
     }
   }

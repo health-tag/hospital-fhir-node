@@ -55,6 +55,11 @@ const LoginPage = () => {
     }
   };
 
+  const pinValidator = (val: string) => {
+    const result = /\d{6}/.test(val);
+    return { result: result, message: "PIN ต้องเป็นตัวเลข 6 หลักเท่านั้น" };
+  };
+
   return (
     <SmallCenterDialogLayout>
       {isDisplayErrorMessage && (
@@ -82,13 +87,16 @@ const LoginPage = () => {
             setValue={setUserName}
           />
           <Input
-            label="รหัสผ่าน"
+            label="รหัสตัวเลข"
             required
-            placeholder="รหัสผ่าน"
+            placeholder="รหัสตัวเลข 6 หลัก"
+            maxLength={6}
             type="password"
+            inputMode="numeric"
             name={nameof<LoginData>("password")}
             value={loginData.password}
-            setValue={setPassword}
+            validator={pinValidator}
+            setValue={(val: string) => setPassword(val.trim().replace(/\D/, ""))}
           />
           <Button
             mode="primary"

@@ -138,6 +138,7 @@ const AdminRegisterPage = () => {
         <Input
           type="text"
           name="hospitalNumber"
+          autocomplete={false}
           value={registerData.hospitalNumber}
           setValue={(val: string) => setHospitalNumber(val.trim())}
           required
@@ -148,6 +149,7 @@ const AdminRegisterPage = () => {
         <Input
           type="password"
           name="pinCode"
+          autocomplete={false}
           value={registerData.pinCode}
           setValue={(val: string) => setPinCode(val.trim().replace(/\D/, ""))}
           required
@@ -163,6 +165,7 @@ const AdminRegisterPage = () => {
           forceRevalidate={escapeHatch}
           type="password"
           name="pinCodeVerify"
+          autocomplete={false}
           value={registerData.pinCodeVerify}
           setValue={(val: string) =>
             setPinCodeVerify(val.trim().replace(/\D/, ""))

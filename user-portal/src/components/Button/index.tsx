@@ -41,7 +41,7 @@ const Button = (props: Props) => {
           <span>กำลังดำเนินการ</span>
         </div>
       ) : (
-        <div className="flex items-center gap-2 justify-center">{children}</div>
+        <div className="flex items-center gap-2 justify-center flex-wrap">{children}</div>
       )}
     </button>
   );

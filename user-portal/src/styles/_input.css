@@ -5,6 +5,7 @@
     transition-property: all, --primary-color-prop, --secondary-color-prop;
     transition-duration: 300ms;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    word-break:normal;
   }
 
 
@@ -21,6 +22,8 @@
       var(--primary-color-prop),
       var(--secondary-color-prop)
     );
+    --primary-color-prop: hsl(234deg, 34%, 41%);
+    --secondary-color-prop: hsl(198deg, 79%, 36%);
   }
 
   button.primary:hover,

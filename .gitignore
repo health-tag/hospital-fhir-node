@@ -1,1 +1,4 @@
 .DS_Store
+site-packages
+hapi-fhir-mysql
+__pycache__

@@ -1,7 +1,7 @@
 import glob
 import pandas as pd
 import lib.utilitiy as utility
-from lib.drug import creatre_allergyIntolerence_resource
+from lib.drug import create_allergyIntolerence_resource
 
 
 # region Dictionary
@@ -116,7 +116,7 @@ fhir_patient_entries = [create_patient_resource(hos_addr, hospcode=row["HOSPCODE
                                                 name=row["NAME"], surname=row["LNAME"], folders43_gender=row["SEX"]) for i, row in df_person.iterrows()]
 df_drug_allergy = pd.read_csv(
     drugallergy_filename, encoding="utf8", delimiter="|")
-fhir_allergyIntolerance_entries = [y for i, row in df_drug_allergy.iterrows() if (y := creatre_allergyIntolerence_resource(hospcode=hospcode, drug_name=row["DNAME"], drug_dc24=row["DRUGALLERGY"],
+fhir_allergyIntolerance_entries = [y for i, row in df_drug_allergy.iterrows() if (y := create_allergyIntolerence_resource(hospcode=hospcode, drug_name=row["DNAME"], drug_dc24=row["DRUGALLERGY"],
                                                                                                                            drug_alevel=row["ALEVEL"], drug_daterecord=row["DATERECORD"], drug_typedx=row["TYPEDX"], drug_symptom=row["SYMPTOM"], patient_cid=row["CID"])) is not None]
 print("DRUGALLERGY CSV", len(df_drug_allergy), "items")
 print("AllergyIntolerance resource", len(

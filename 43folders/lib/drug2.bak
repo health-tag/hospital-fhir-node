@@ -1,0 +1,90 @@
+def create_medication_resource():
+    medication_resource = {
+        "resourceType": "MedicationDispense",
+        "extension": [
+            {
+                "url": "https://sil-th.org/fhir/StructureDefinition/product-category",
+                "valueCodeableConcept": {
+                    "coding": [
+                        {
+                            "system": "https://sil-th.org/fhir/CodeSystem/csop-productCategory",
+                            "code": f"{item_combined_data['product_cat']}"
+                        }
+                    ]
+                }
+            },
+            # **repeat_drug
+        ], 
+        "identifier": [
+            {
+                "system": "https://sil-th.org/CSOP/dispenseId",
+                "value": f"{item_combined_data['disp_id']}"
+            }
+        ],
+        "status": f"{disp_status_mapping[item_combined_data['disp_status']]}",
+        "category": {
+            "coding": [
+                {
+                    "system": "http://terminology.hl7.org/fhir/CodeSystem/medicationdispense-category",
+                    "code": "outpatient"
+                }
+            ]
+        },
+        "medicationCodeableConcept": {
+            "coding": [
+                {
+                    "system": "https://sil-th.org/CSOP/localCode",
+                    "code": f"{item_combined_data['local_drug_id']}"
+                },
+                {
+                    "system": "https://tmt.this.or.th",
+                    "code": f"{item_combined_data['standard_drug_id']}"
+                }
+            ],
+            "text": f"{item_combined_data['dfs']}"
+        },
+        "subject": {
+            "reference": f"urn:uuid:Patient/{h_code}/{item_combined_data['hn']}",
+        },
+        "context": {
+            "reference": f"urn:uuid:Encounter/D/{item_combined_data['disp_id']}"
+        },
+        "performer": [
+            {
+                "actor": {
+                    "reference": f"urn:uuid:Organization/{hos_addr}"
+                }
+            }
+        ],
+        "quantity": {
+            "value": item_combined_data['quantity'],
+            "unit": f"{item_combined_data['package_size']}"
+        },
+        # "daysSupply": {
+        #     "value": !?<<BILLDISP.DispensedItem.SupplyFor:Number>>,
+        #     "unit": "!?<<BILLDISP.DispensedItem.SupplyFor:Unit>"
+        # },
+        "whenHandedOver": f"{item_combined_data['disp_date']}",
+        "dosageInstruction": [
+            {
+                "text": f"{item_combined_data['instruction_text']}",
+                "timing": {
+                    "code": {
+                        "text": f"{item_combined_data['instruction_code']}"
+                    }
+                }
+            }
+        ],
+        # "substitution": {
+        #     "wasSubstituted": prd_code_flag[item_combined_data['prd_code']],
+        #     "type": {
+        #         "coding": [
+        #             {
+        #                 "system": "https://sil-th.org/fhir/CodeSystem/csop-substitutionAllowed",
+        #                 "code": f"{item_combined_data['prd_code']}"
+        #             }
+        #         ]
+        #     }
+        # }
+    }
+

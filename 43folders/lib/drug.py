@@ -10,13 +10,11 @@ criticality_mapping = {1: "low", 2: "high", 3: "high",
                        4: "high", 5: "high", 6: "high", 7: "high", 8: "high"}
 verificationStatus_mapping = {1: "confirmed", 2: "confirmed",
                               3: "unconfirmed", 4: "unconfirmed", 5: "unconfirmed"}
-
 # endregion
 
 date_regex = re.compile(r"(\d{4})(\d{2})(\d{2})")
 
-
-def creatre_allergyIntolerence_resource(hospcode, drug_name, drug_dc24, drug_daterecord, drug_alevel, drug_typedx, drug_symptom, patient_cid):
+def create_allergyIntolerence_resource(hospcode, drug_name, drug_dc24, drug_daterecord, drug_alevel, drug_typedx, drug_symptom, patient_cid):
     drug_dc24 = str(drug_dc24)
     allergyIntolerance_resource = {
         "resourceType": "AllergyIntolerance",

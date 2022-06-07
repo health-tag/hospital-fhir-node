@@ -13,8 +13,8 @@ detail_items = {}
 headers = {
     'apikey': ''
 }
-base_fhir_url = 'http://localhost:8080/fhir-api-key-auth'
-# base_fhir_url = 'http://localhost:8000/fhir-api'
+#base_fhir_url = 'http://localhost:8080/fhir-api-key-auth'
+base_fhir_url = 'http://localhost:8080/fhir'
 hos_addr = '0xC88a594dBB4e9F1ce15d59D0ED129b92E6d89884'
 
 license_mapping = {

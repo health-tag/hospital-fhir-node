@@ -16,6 +16,7 @@ import {
 import {
   ChevronIcon,
   CogIcon,
+  FoodAllergyIcon,
   KeyIcon,
   MedicationIcon,
   SupportIcon,
@@ -25,6 +26,7 @@ import { useEffect, useRef, useState } from "react";
 import MedicationsPage from "./Medications";
 import axios from "axios";
 import { Placeholder } from "@components/Placeholder";
+import AllergiesPage from "./Allergies";
 
 const UserConsolePage = () => {
   const navigate = useNavigate();
@@ -74,9 +76,9 @@ const UserConsolePage = () => {
       const patientInfo = patientResponse.data.entry[0].resource;
       const patientID = patientInfo.id;
       // Temporary workaround for the name data which is still included "ชื่อ"
-      const nameRegexResult = nameRegex.exec(patientInfo.name[0].text.trim());
-      const name = nameRegexResult?.groups?.name ?? "";
-      const surname = nameRegexResult?.groups?.surname ?? "";
+      //const nameRegexResult = nameRegex.exec(patientInfo.name[0].text.trim());
+      const name = patientInfo.name[0].given[0];
+      const surname = patientInfo.name[0].family;
       setProfileData({ name: name, surname: surname });
     })();
   }, []);
@@ -98,6 +100,10 @@ const UserConsolePage = () => {
           <NavLink to="medications">
             <MedicationIcon className="h-6" />
             ยา
+          </NavLink>
+          <NavLink to="allergies">
+            <FoodAllergyIcon className="h-6" />
+            แพ้ยา
           </NavLink>
           <hr />
           <motion.h5 variants={menuHeaderAnimationVariants}>
@@ -168,6 +174,7 @@ const UserConsolePage = () => {
         <Routes location={location} key={location.pathname}>
           <Route path="" element={<Navigate to="medications" replace />} />
           <Route path="medications" element={<MedicationsPage />} />
+          <Route path="allergies" element={<AllergiesPage />} />
           <Route path="setting" element={<SettingPage />} />
         </Routes>
       </AnimatePresence>

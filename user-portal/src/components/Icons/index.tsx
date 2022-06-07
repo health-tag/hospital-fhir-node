@@ -6,6 +6,8 @@ import { ReactComponent as QRSVG } from "@assets/icons/qr-code-svgrepo-com.svg";
 import { ReactComponent as CardDiscardSVG } from "@assets/icons/card-discard-svgrepo-com.svg";
 import { ReactComponent as PasswordResetSVG } from "@assets/icons/password-account-security-reset-safety-svgrepo-com.svg";
 import { ReactComponent as PremiumSVG } from "@assets/icons/premium-svgrepo-com.svg";
+import { ReactComponent as FoodAllergySVG } from "@assets/icons/allergy-food-label-svgrepo-com.svg";
+
 
 export const AcceptIcon = ({ className = "h-6 w-6", ...otherProps }) => (
   <svg
@@ -222,6 +224,11 @@ export const PasswordResetIcon = ({ className = "h-6 w-6", ...otherProps }) => (
 export const PremiumIcon = ({ className = "h-6 w-6", ...otherProps }) => (
   <PremiumSVG className={className} {...otherProps} />
 );
+
+export const FoodAllergyIcon = ({ className = "h-6 w-6", ...otherProps }) => (
+  <FoodAllergySVG className={className} {...otherProps} />
+);
+
 export const UserAddIcon = ({ className = "h-6 w-6", ...otherProps }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"

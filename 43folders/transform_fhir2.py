@@ -18,7 +18,7 @@ def create_organization_resource(hos_addr, hospcode, hospital_name):
         "resource": {
             "resourceType": "Organization",
             "identifier": [
-                {
+                {ls
                     "system": "https://bps.moph.go.th/hcode/5",
                     "value": f"{hospcode}"
                 }

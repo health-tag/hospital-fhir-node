@@ -95,7 +95,7 @@ services:
     image: pantsel/konga:latest
     restart: always
     networks:
-        - hapi-fhir-network
+      - hapi-fhir-network
     environment:
       DB_ADAPTER: postgres
       DB_URI: postgresql://kong:kong@db:5432/konga

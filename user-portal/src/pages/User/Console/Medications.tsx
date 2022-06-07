@@ -52,9 +52,9 @@ const MedicationsPage = () => {
         const patientInfo = patientResponse.data.entry[0].resource;
         const patientID = patientInfo.id;
         // Temporary workaround for the name data which is still included "ชื่อ"
-        const nameRegexResult = nameRegex.exec(patientInfo.name[0].text.trim());
-        const name = nameRegexResult?.groups?.name ?? "";
-        const surname = nameRegexResult?.groups?.surname ?? "";
+        // const nameRegexResult = nameRegex.exec(patientInfo.name[0].text.trim());
+        const name = patientInfo.name[0].given[0];
+        const surname = patientInfo.name[0].family;
         setName(`${name} ${surname}`);
         let prescriptions: Array<Prescription> = [];
         axios
@@ -68,15 +68,14 @@ const MedicationsPage = () => {
             }
           )
           .then((response) => {
-            for (const resource of response.data.entry) {
-              if (resource.resource.resourceType == "MedicationDispense") {
+            for (let resource of response.data.entry) {
+              resource = resource.resource;
+              if (resource.resourceType == "MedicationDispense") {
                 const data = {
-                  displayText: resource.resource.medicationCodeableConcept.text,
-                  dosageInstruction:
-                    resource.resource.dosageInstruction[0].text,
-                  whenHandedOver:
-                    resource.resource.whenHandedOver.split("T")[0],
-                  quantity: resource.resource.quantity,
+                  displayText: resource.medicationCodeableConcept.text,
+                  dosageInstruction: resource.dosageInstruction[0].text,
+                  whenHandedOver: resource.whenHandedOver.split("T")[0],
+                  quantity: resource.quantity,
                 };
                 prescriptions.push(data);
               }
@@ -89,11 +88,11 @@ const MedicationsPage = () => {
 
   return (
     <motion.div
-    variants={pageAnimationVariants}
-    initial="initial"
-    animate="animate"
-    exit="exit"
-  >
+      variants={pageAnimationVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       <h3 className="page-h">
         <MedicationIcon className="h-8 w-8 inline-block mr-3" />
         รายการยา

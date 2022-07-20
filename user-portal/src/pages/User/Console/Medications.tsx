@@ -48,7 +48,11 @@ const MedicationsPage = () => {
         let prescriptions: Array<Prescription> = [];
         axios
           .get(
-            `${fhirURL}/$everything?_format=json`
+            `${fhirURL}/$everything?_format=json`, {
+                headers: {
+                Authorization: authHeader
+              }
+            }
           )
           .then((response) => {
             for (const resource of response.data.entry) {
@@ -81,12 +85,16 @@ const MedicationsPage = () => {
         setPrescriptionList([]);
         setName("");
       })
-  }, [fhirURL, mappingType]);
+  }, [fhirURL, mappingType, authHeader]);
 
   useEffect(() => {
     axios
       .get(
-        `${fhirURL}`
+        `${fhirURL}`, {
+          headers: {
+            Authorization: authHeader
+          }
+        }
       )
       .then((patientResponse) => {
         const patientInfo = patientResponse.data;
@@ -99,7 +107,11 @@ const MedicationsPage = () => {
         let prescriptions: Array<Prescription> = [];
         axios
           .get(
-            `${fhirURL}/$everything?_format=json`
+            `${fhirURL}/$everything?_format=json`, {
+              headers: {
+                Authorization: authHeader
+              }
+            }
           )
           .then((response) => {
             for (const resource of response.data.entry) {
@@ -148,6 +160,8 @@ const MedicationsPage = () => {
               Headers Authentication value (optional)
             </label>
             <input
+              placeholder="Bearer ..."
+              onChange={(e) => setAuthHeaders(e.target.value)}
               type="text"
               name="auth"
               id="auth"

@@ -149,6 +149,7 @@ const MedicationsPage = () => {
             <input
               placeholder="https://..../fhir"
               onChange={(e) => setFhirURL(e.target.value)}
+              value={fhirURL}
               type="text"
               name="fhir-base"
               id="fhir-base"

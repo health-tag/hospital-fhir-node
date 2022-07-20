@@ -21,35 +21,24 @@ type Prescription = {
 const nameRegex = /(ชื่อ|)\s+(?<name>\S+)\s+(?<surname>.+)/;
 
 const MedicationsPage = () => {
-  const navigate = useNavigate();
-
-  const [prescriptions, setPrescriptionList] = useState<Array<Prescription>>(
-    []
-  );
+  const [fhirURL, setFhirURL] = useState<string>("http://54.151.227.175:8000/fhir-api/Patient/2");
+  const [prescriptions, setPrescriptionList] = useState<Array<Prescription>>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [name, setName] = useState<string | null>("");
-  const [hn, setHN] = useState<string | null>("");
+  const [mappingType, setMappingType] = useState<string>("dispense");
+  const [authHeader, setAuthHeaders] = useState<string>("")
 
   useEffect(() => {
-    const username = sessionStorage.getItem("username")!;
-    const password = sessionStorage.getItem("password")!;
-    const hn = sessionStorage.getItem("hn");
-    if (!hn) {
-      navigate("/", { replace: true });
-    }
-    setHN(hn);
     axios
       .get(
-        `${process.env.REACT_APP_KONG_URL}/fhir-api/Patient?identifier=https%3A%2F%2Fsil-th.org%2FCSOP%2Fhn%7C${hn}`,
-        {
-          auth: {
-            username: username,
-            password: password,
-          },
+        `${fhirURL}`, {
+          headers: {
+            Authorization: authHeader
+          }
         }
       )
       .then((patientResponse) => {
-        const patientInfo = patientResponse.data.entry[0].resource;
+        const patientInfo = patientResponse.data;
         const patientID = patientInfo.id;
         // Temporary workaround for the name data which is still included "ชื่อ"
         const nameRegexResult = nameRegex.exec(patientInfo.name[0].text.trim());
@@ -59,13 +48,58 @@ const MedicationsPage = () => {
         let prescriptions: Array<Prescription> = [];
         axios
           .get(
-            `${process.env.REACT_APP_KONG_URL}/fhir-api/Patient/${patientID}/$everything?_format=json`,
-            {
-              auth: {
-                username: username,
-                password: password,
-              },
+            `${fhirURL}/$everything?_format=json`
+          )
+          .then((response) => {
+            for (const resource of response.data.entry) {
+              if (resource.resource.resourceType == "MedicationDispense" && mappingType == "dispense") {
+                const data = {
+                  displayText: resource.resource.medicationCodeableConcept.text,
+                  dosageInstruction:
+                    resource.resource.dosageInstruction[0].text,
+                  whenHandedOver:
+                    resource.resource.whenHandedOver.split("T")[0],
+                  quantity: resource.resource.quantity,
+                };
+                prescriptions.push(data);
+              }
+              if (resource.resource.resourceType == "MedicationRequest" && mappingType == "request") {
+                const data = {
+                  displayText: resource.resource.medicationCodeableConcept.text,
+                  dosageInstruction: "",
+                  whenHandedOver:
+                    resource.resource.authoredOn.split("T")[0],
+                  quantity: resource.resource.quantity,
+                };
+                prescriptions.push(data);
+              }
             }
+            setPrescriptionList(prescriptions);
+          });
+      })
+      .catch((error) => {
+        setPrescriptionList([]);
+        setName("");
+      })
+  }, [fhirURL, mappingType]);
+
+  useEffect(() => {
+    axios
+      .get(
+        `${fhirURL}`
+      )
+      .then((patientResponse) => {
+        const patientInfo = patientResponse.data;
+        const patientID = patientInfo.id;
+        // Temporary workaround for the name data which is still included "ชื่อ"
+        const nameRegexResult = nameRegex.exec(patientInfo.name[0].text.trim());
+        const name = nameRegexResult?.groups?.name ?? "";
+        const surname = nameRegexResult?.groups?.surname ?? "";
+        setName(`${name} ${surname}`);
+        let prescriptions: Array<Prescription> = [];
+        axios
+          .get(
+            `${fhirURL}/$everything?_format=json`
           )
           .then((response) => {
             for (const resource of response.data.entry) {
@@ -81,7 +115,6 @@ const MedicationsPage = () => {
                 prescriptions.push(data);
               }
             }
-
             setPrescriptionList(prescriptions);
           });
       });
@@ -94,9 +127,53 @@ const MedicationsPage = () => {
     animate="animate"
     exit="exit"
   >
+    <div className="shadow overflow-hidden sm:rounded-md">
+      <div className="px-4 py-5 bg-white sm:p-6">
+        <div className="grid grid-cols-6 gap-6">
+          <div className="col-span-6 sm:col-span-3">
+            <label htmlFor="fhir-base" className="block text-sm font-medium text-gray-700">
+              FHIR base URL
+            </label>
+            <input
+              placeholder="https://..../fhir"
+              onChange={(e) => setFhirURL(e.target.value)}
+              type="text"
+              name="fhir-base"
+              id="fhir-base"
+              className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+            />
+          </div>
+          <div className="col-span-6 sm:col-span-3">
+            <label htmlFor="auth" className="block text-sm font-medium text-gray-700">
+              Headers Authentication value (optional)
+            </label>
+            <input
+              type="text"
+              name="auth"
+              id="auth"
+              className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+            />
+          </div>
+          <div className="col-span-6 sm:col-span-3">
+            <label htmlFor="mapping-type" className="block text-sm font-medium text-gray-700">
+              Mapping Type
+            </label>
+            <select
+              id="mapping-type"
+              name="mapping-type"
+              className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              onChange={(e) => setMappingType(e.target.value)}
+            >
+              <option value="dispense">MedicationDispense</option>
+              <option value="request">MedicationRequest</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
       <h3 className="page-h">
         <MedicationIcon className="h-8 w-8 inline-block mr-3" />
-        รายการยา
+        รายการยา ของ {name}
       </h3>
       {isLoading ? (
         <section className="card">

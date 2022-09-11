@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="windows-874"?>
+<ClaimRec System="OP" PayPlan="CS" Version="0.93">
+<Header>
+<HCODE>13814</HCODE>
+<HNAME>โรงพยาบาลศิริราช</HNAME>
+<DATETIME>2021-11-22T08:54:00</DATETIME>
+<SESSNO>1</SESSNO>
+<RECCOUNT>0001</RECCOUNT>
+</Header>
+<Dispensing>
+13814|O-SM1-0094-25641027|IO556400086754|51157611|3100100050488|2021-10-27T12:12:00|2021-10-27T12:12:00|ว55014|1|62.000|59.000|3.000|0.000|HP|CS|1||
+</Dispensing>
+<DispensedItems>
+O-SM1-0094-25641027|1|FMLX|526363||FML EYE DROPS .                ขาดมิย62|BOT|RE1DR4|หยอดตาขวาครั้งละ 1 หยดวันละ 4 ครั้งเช้า กลางวัน เย็น ก่อนนอน *7วัน*|1|62.000|62.000|59.000|59.000|||||
+</DispensedItems>
+</ClaimRec>
+<?EndNote Checksum="522aaf64a9878dad2211552eb370b933"?>

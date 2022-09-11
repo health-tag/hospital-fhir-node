@@ -2,9 +2,11 @@
  # -*- coding: utf-8 -*-
 
 import xmltodict
-import json
 import requests
 import glob
+import re
+import json
+from mapping_key import license_mapping,disp_status_mapping,prd_code_flag
 
 tran_items = {}
 disp_items = {}
@@ -17,64 +19,6 @@ headers = {
 base_fhir_url = 'http://localhost:8080/fhir'
 hos_addr = '0xC88a594dBB4e9F1ce15d59D0ED129b92E6d89884'
 
-license_mapping = {
-    'ว': {
-        'type': 'MD',
-        'system': 'https://www.tmc.or.th'
-    },
-    'ท': {
-        'type': 'DDS',
-        'system': 'https://www.dentalcouncil.or.th'
-    },
-    'พ': {
-        'type': 'NP',
-        'system': 'https://www.tnmc.or.th'
-    },
-    'ภ': {
-        'type': 'RPH',
-        'system': 'https://www.pharmacycouncil.org'
-    }
-}
-
-disp_status_mapping = {
-    '0': 'cancelled',
-    '1': 'completed',
-    '2': 'declined',
-    '3': 'entered-in-error'
-}
-
-prd_code_flag = {
-    '0': False,
-    '1': False,
-    '2': True,
-    '3': True,
-    '4': False,
-    '5': True,
-    '6': True,
-    '7': False,
-    '8': False,
-    '9': False,
-}
-
-bill_muad_mapping = {
-    "1": "https://sil-th.org/CSOP/standardCode",
-    "2": "https://sil-th.org/CSOP/standardCode",
-    "3": "https://tmt.this.or.th",
-    "5": "https://sil-th.org/CSOP/standardCode",
-    "6": "https://tmlt.this.or.th",
-    "7": "https://tmlt.this.or.th",
-    "8": "https://sil-th.org/CSOP/standardCode",
-    "9": "https://sil-th.org/CSOP/standardCode",
-    "A": "https://sil-th.org/CSOP/standardCode",
-    "B": "https://sil-th.org/CSOP/standardCode",
-    "C": "https://sil-th.org/CSOP/standardCode",
-    "D": "https://sil-th.org/CSOP/standardCode",
-    "E": "https://sil-th.org/CSOP/standardCode",
-    "F": "https://sil-th.org/CSOP/standardCode",
-    "G": "https://sil-th.org/CSOP/standardCode",
-    "H": "https://sil-th.org/CSOP/standardCode",
-    "I": "https://sil-th.org/CSOP/standardCode",
-}
 
 files = glob.glob("./uploads/*")
 bill_trans = ''
@@ -85,7 +29,17 @@ for file in files:
     elif 'BILLDISP' in file:
         bill_disp = file
 
-with open(bill_trans, encoding="utf8") as xml_file:
+def get_file_encoding(file_path):
+    with open(file_path) as xml_file_for_encoding_check:
+        first_line = xml_file_for_encoding_check.readline()
+        encoding = re.search('encoding="(.*)"',first_line).group(1)
+        if encoding == "windows-874":
+            encoding = "cp874"
+        return encoding
+bill_trans_encoding = get_file_encoding(bill_trans)
+bill_disp_encoding = get_file_encoding(bill_disp)
+
+with open(bill_trans, encoding=bill_trans_encoding) as xml_file:
     data_dict = xmltodict.parse(xml_file.read())
     h_code = data_dict['ClaimRec']['Header']['HCODE']
     h_name = data_dict['ClaimRec']['Header']['HNAME']
@@ -123,7 +77,7 @@ with open(bill_trans, encoding="utf8") as xml_file:
     #     items.append(item_da)
     #     tran_items[inv_no] = items
 
-with open(bill_disp, encoding="utf8") as xml_file:
+with open(bill_disp,  encoding=bill_disp_encoding) as xml_file:
     data_dict = xmltodict.parse(xml_file.read())
     main_disps = data_dict['ClaimRec']['Dispensing'].split('\n')
     detail_disps = data_dict['ClaimRec']['DispensedItems'].split('\n')
@@ -501,9 +455,9 @@ for disp_id, info in disp_items.items():
             },
         ]
     }
+
     json_data['entry'].extend(claim_items)
-    # print(json.dumps(json_data))
-    # break
+    print(json.dumps(json_data))
     res = requests.post(base_fhir_url, json=json_data, headers=headers)
     print(res.status_code)
     print(res.content)

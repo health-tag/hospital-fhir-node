@@ -2,3 +2,5 @@
 site-packages
 hapi-fhir-mysql
 __pycache__
+uploads/csop/*
+uploads/43folders/*.txt

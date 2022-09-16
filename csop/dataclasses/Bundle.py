@@ -3,6 +3,9 @@ from Entry import Entry
 
 import jsonpickle
 
+from Organization import Organization
+from Patient import Patient
+
 
 class BundleType(Enum):
     Batch = 1
@@ -24,10 +27,16 @@ class Bundle:
         self.entry = entries
 
 
-oraganizationEntry = Entry.create_organization_entry(hospital_blockchain_address="555", hospital_name="Siriraj",
-                                                     hospital_code="X12")
-patientEntry = Entry.create_patient_entry("John", "Marstro", "1700", "55", "555", "X12")
-patientEntry2 = Entry.create_patient_entry("William", "Runtherford", "1700", "55", "555", "X12")
+hospital_blockchain_address = "555"
+hospital_name = "Siriraj"
+hospital_code = "X12"
+oraganizationEntry = Organization(hospital_blockchain_address=hospital_blockchain_address, hospital_name=hospital_name,
+                                  hospital_code=hospital_code).create_entry()
+patientEntry = Patient(name="John", surname="Marstro", thai_citizen_id="1700", hospital_number="11674",
+                       hospital_blockchain_address=hospital_blockchain_address, hospital_code=hospital_code).create_entry()
+patientEntry2 = Patient(name="William", surname="Runtherford", thai_citizen_id="1700", hospital_number="15546",
+                       hospital_blockchain_address=hospital_blockchain_address, hospital_code=hospital_code).create_entry()
 
-root_bundle = Bundle(BundleType.Batch, [oraganizationEntry, Bundle(BundleType.Transaction,[patientEntry,patientEntry2])])
+root_bundle = Bundle(BundleType.Batch,
+                     [oraganizationEntry, Bundle(BundleType.Transaction, [patientEntry, patientEntry2])])
 print(jsonpickle.encode(root_bundle, unpicklable=False))

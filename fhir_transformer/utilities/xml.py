@@ -1,19 +1,21 @@
+import math
 import re
 from dataclasses import dataclass
+from datetime import datetime
 
 import jsonpickle
 import requests
 import xmltodict
 
-from csop.FHIR.Bundle import Bundle, BundleType
-from csop.FHIR.Encounter import EncounterDispensing
-from csop.FHIR.Location import Location
-from csop.FHIR.MedicationDispense import MedicationDispense
-from csop.FHIR.Organization import Organization
-from csop.FHIR.Patient import Patient
-from csop.FHIR.Practitioner import Practitioner
-from csop.utilities.mapping_key import license_mapping
-from csop.utilities.networking import send_bundle
+from fhir_transformer.FHIR.Bundle import Bundle, BundleType
+from fhir_transformer.FHIR.Encounter import EncounterDispensing
+from fhir_transformer.FHIR.Location import Location
+from fhir_transformer.FHIR.MedicationDispense import MedicationDispense
+from fhir_transformer.FHIR.Organization import Organization
+from fhir_transformer.FHIR.Patient import Patient
+from fhir_transformer.FHIR.Practitioner import Practitioner
+from fhir_transformer.fhir_transformer_config import max_patient_per_cycle
+from fhir_transformer.utilities.networking import send_bundle
 
 # CONFIG SHOULD MOVE OUT OF THIS FILE
 hospital_blockchain_address = '0xC88a594dBB4e9F1ce15d59D0ED129b92E6d89884'
@@ -56,14 +58,14 @@ class DispensingItemDetail:
 class DispensingItem:
     _practitioner: str
 
-    @property
-    def practitioner(self):
-        return license_mapping[self._practitioner]
+    # @property
+    # def practitioner(self):
+    #    return license_mapping[self._practitioner]
 
     def __init__(self, provider_id: str, disp_id: str, inv_no: str, presc_date: str, disp_date: str, license_id: str,
-                 disp_status: str, practitioner: str, items: list[DispensingItemDetail]):
+                 disp_status: str, items: list[DispensingItemDetail]):
         self.items = items
-        self._practitioner = practitioner
+        # self._practitioner = practitioner
         self.disp_status = disp_status
         self.license_id = license_id
         self.disp_date = disp_date
@@ -121,7 +123,7 @@ def _open_bill_disp_xml(file_path: str):
                 disp_date=item_split[6],
                 license_id=item_split[7],
                 disp_status=item_split[15],
-                practitioner=license_mapping[item_split[7][0]],
+                # practitioner=license_mapping[item_split[7][0]],
                 items=list()
             )
             disp_items[item_data.disp_id] = item_data
@@ -151,6 +153,7 @@ def process(bill_trans_xml_path: str, bill_disp_xml_path: str):
     bill_disp_xml_data = _open_bill_disp_xml(bill_disp_xml_path)
 
     # region GENERATE + SEND ONE ORGANIZATION DATA
+    print(f"PREPARE AND SENDING ORGANIZATION {datetime.now()}")
     organization_bundle = Bundle(BundleType.Batch,
                                  [Organization(bill_trans_xml_data.hospital_name, hospital_blockchain_address,
                                                bill_trans_xml_data.hospital_code).create_entry()])
@@ -159,6 +162,7 @@ def process(bill_trans_xml_path: str, bill_disp_xml_path: str):
     # endregion GENERATE + SEND ONE ORGANIZATION DATA
 
     # region GENERATE + SEND UNIQUE LOCATION DATA
+    print(f"PREPARE AND SENDING LOCATION {datetime.now()}")
     locations = dict()
     for inv_no, bill_trans_item in bill_trans_xml_data.items_dict.items():
         locations[bill_trans_item.station] = Location(station=bill_trans_item.station,
@@ -168,6 +172,7 @@ def process(bill_trans_xml_path: str, bill_disp_xml_path: str):
     # endregion GENERATE + SEND UNIQUE LOCATION DATA
 
     # region Generate FHIR Resource for each person
+    print(f"PREPARE PRACTITIONERS + PATIENT + ENCOUNTER + MEDICAL DISPENSING {datetime.now()}")
     practitioners = dict()
     patients: dict[str, Patient] = dict()
     encounters: dict[str, list[EncounterDispensing]] = dict()
@@ -214,18 +219,29 @@ def process(bill_trans_xml_path: str, bill_disp_xml_path: str):
                                                     hospital_blockchain_address=hospital_blockchain_address)
             medicationDispenses[corresponding_bill_trans_item.pid].append(medicationDispense)
     # SEND PRACTITIONERS
+    print(f"SENDING PRACTITIONERS {datetime.now()}")
     practitioners_bundle = Bundle(BundleType.Batch, [entry.create_entry() for entry in list(practitioners.values())])
     send_bundle(practitioners_bundle)
     # PREPARE PATIENT + ENCOUNTER + MEDICAL DISPENSING
     patient_transaction_bundle = list()
-    for key in patients.keys():
-        entry = list()
-        entry = entry + [patients[key].create_entry()]
+    cycle = 0
+    cycle_entries = list()
+    patients_count = len(patients.keys())
+    print(f"SENDING PATIENT + ENCOUNTER + MEDICAL DISPENSING IN {math.ceil(patients_count/max_patient_per_cycle)} CYCLES {datetime.now()}")
+    for i, key in enumerate(patients.keys()):
+        cycle_entries = cycle_entries + [patients[key].create_entry()]
         if key in encounters:
-            entry = entry + [encounter.create_entry() for encounter in encounters[key]]
+            cycle_entries = cycle_entries + [encounter.create_entry() for encounter in encounters[key]]
         if key in medicationDispenses:
-            entry = entry + [medication_dispense.create_entry() for medication_dispense in medicationDispenses[key]]
-        patient_transaction_bundle.append(Bundle(BundleType.Transaction, entry))
+            cycle_entries = cycle_entries + [medication_dispense.create_entry() for medication_dispense in
+                                             medicationDispenses[key]]
+        if ((i > 0) and (i % max_patient_per_cycle == 0)) or (i+1 == patients_count):
+            print(f"SENDING PATIENT + ENCOUNTER + MEDICAL DISPENSING CYCLE {cycle+1} {datetime.now()}")
+            send_bundle(Bundle(BundleType.Transaction, cycle_entries))
+            cycle = cycle+1
+            cycle_entries.clear()
+        # patient_transaction_bundle.append(Bundle(BundleType.Transaction, entry).create_entry(i)) # FHIR IS NOT SUPPORT BUNDLE OF TRANSACTION!
+        # patient_transaction_bundle.append(Bundle(BundleType.Transaction, entry).create_entry(i))
     # SEND PATIENT + ENCOUNTER + MEDICAL DISPENSING
-    send_bundle(Bundle(BundleType.Batch,patient_transaction_bundle))
+    # send_bundle(Bundle(BundleType.Batch, patient_transaction_bundle))# FHIR IS NOT SUPPORT BUNDLE OF TRANSACTION!
     # endregion

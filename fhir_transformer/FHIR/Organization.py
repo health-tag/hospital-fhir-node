@@ -1,5 +1,5 @@
-from csop.FHIR.Base import FHIRResource
-from csop.FHIR.Entry import Entry
+from fhir_transformer.FHIR.Base import FHIRResource
+from fhir_transformer.FHIR.Entry import Entry
 
 
 class Organization(FHIRResource):

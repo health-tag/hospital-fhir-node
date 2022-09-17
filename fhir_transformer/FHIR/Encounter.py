@@ -1,8 +1,8 @@
 from typing import Dict, List
 
-from csop.FHIR.Base import FHIRResource
-from csop.FHIR.Entry import Entry
-from csop.utilities.mapping_key import disp_status_mapping
+from fhir_transformer.FHIR.Base import FHIRResource
+from fhir_transformer.FHIR.Entry import Entry
+from fhir_transformer.utilities.mapping_key import disp_status_mapping
 
 
 class EncounterDispensing(FHIRResource):

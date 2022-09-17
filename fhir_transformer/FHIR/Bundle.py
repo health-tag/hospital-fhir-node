@@ -4,9 +4,9 @@ from typing import Any
 
 import jsonpickle
 
-from csop.FHIR.Organization import Organization
-from csop.FHIR.Patient import Patient
-from csop.FHIR.Entry import Entry
+from fhir_transformer.FHIR.Organization import Organization
+from fhir_transformer.FHIR.Patient import Patient
+from fhir_transformer.FHIR.Entry import Entry
 
 
 class BundleType(Enum):
@@ -33,6 +33,13 @@ class Bundle:
     def __getstate__(self) -> dict[str, Any]:
         json_dict = self.__dict__.copy()
         return json_dict
+
+    def create_entry(self, bundle_id: int) -> Entry:
+        entry = Entry(f"urn:uuid:Bundle/{bundle_id}", self, {
+            "method": "POST",
+            "url": f"http://localhost:8080/fhir",
+        })
+        return entry
 
 # hospital_blockchain_address = "555"
 # hospital_name = "Siriraj"

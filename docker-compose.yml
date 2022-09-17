@@ -8,7 +8,7 @@ services:
     networks:
       - hapi-fhir-network
     volumes:
-      - ./csop/uploads:/srv
+      - ./fhir_transformer/uploads:/srv
 
   web:
     build:

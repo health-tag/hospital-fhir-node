@@ -1,12 +1,40 @@
 import re
+
+import jsonpickle
+import requests
 import xmltodict
+
+from csop.dataclasses.Bundle import Bundle, BundleType
+from csop.dataclasses.Organization import Organization
+from csop.dataclasses.Patient import Patient
+from csop.utilities.mapping_key import license_mapping
+from csop.utilities.networking import send_bundle
+
+# CONFIG SHOULD MOVE OUT OF THIS FILE
+hospital_blockchain_address = '0xC88a594dBB4e9F1ce15d59D0ED129b92E6d89884'
+base_fhir_url = 'http://localhost:8080/fhir'
+headers = {
+    'apikey': ''
+}
+
+
+class BillTransItem:
+    def __init__(self, station: str, inv_no: str, hn: str, member_no: str, pid: str, name: str, pay_plan: str):
+        self.pay_plan = pay_plan
+        self.name = name
+        self.pid = pid
+        self.member_no = member_no
+        self.hn = hn
+        self.inv_no = inv_no
+        self.station = station
 
 
 class BillTrans:
-    hospital_code:str
-    hospital_name:str
+    hospital_code: str
+    hospital_name: str
+    items: dict[str, BillTransItem] = None
 
-    def __init__(self, hospital_code:str, hospital_name:str):
+    def __init__(self, hospital_code: str, hospital_name: str):
         self.hospital_code = hospital_code
         self.hospital_name = hospital_name
 
@@ -22,27 +50,83 @@ def get_file_encoding(file_path):
 
 def open_bill_trans_xml(file_path: str):
     with open(file_path, get_file_encoding(file_path)) as xml_file:
-        dict = xmltodict.parse(xml_file.read())
-        hospital_code = dict['ClaimRec']['Header']['HCODE']
-        hospital_name = dict['ClaimRec']['Header']['HNAME']
-        bill_trans = BillTrans(hospital_code, hospital_name)
+        xml_dict = xmltodict.parse(xml_file.read())
+        tran_items = dict()
+        hospital_code = xml_dict['ClaimRec']['Header']['HCODE']
+        hospital_name = xml_dict['ClaimRec']['Header']['HNAME']
+        obj = BillTrans(hospital_code, hospital_name)
+        bill_trans = xml_dict['ClaimRec']['BILLTRAN'].split('\n')
+        bill_trans_items = xml_dict['ClaimRec']['BillItems'].split('\n')
+        for item in bill_trans:
+            item_split = item.split('|')
+            item_data = BillTransItem(
+                station=item_split[0],
+                inv_no=item_split[4],
+                hn=item_split[6],
+                member_no=item_split[7],
+                pid=item_split[12],
+                name=item_split[13],
+                pay_plan=item_split[15],
+            )
+            tran_items[item_data['inv_no']] = item_data
+        obj.items = tran_items
+        return obj
 
 
-with open(bill_trans, encoding=bill_trans_encoding) as xml_file:
-    data_dict = xmltodict.parse(xml_file.read())
-    h_code = data_dict['ClaimRec']['Header']['HCODE']
-    h_name = data_dict['ClaimRec']['Header']['HNAME']
-    bill_trans = data_dict['ClaimRec']['BILLTRAN'].split('\n')
-    bill_trans_items = data_dict['ClaimRec']['BillItems'].split('\n')
-    for item in bill_trans:
-        item_split = item.split('|')
-        item_data = {
-            'station': item_split[0],
-            'inv_no': item_split[4],
-            'hn': item_split[6],
-            'member_no': item_split[7],
-            'pid': item_split[12],
-            'name': item_split[13],
-            'pay_plan': item_split[15],
-        }
-        tran_items[item_data['inv_no']] = item_data
+def open_bill_disp_xml(file_path: str):
+    with open(file_path, get_file_encoding(file_path)) as xml_file:
+        xml_dict = xmltodict.parse(xml_file.read())
+        disp_items = dict()
+        main_disps = xml_dict['ClaimRec']['Dispensing'].split('\n')
+        detail_disps = xml_dict['ClaimRec']['DispensedItems'].split('\n')
+        for item in main_disps:
+            item_split = item.split('|')
+            item_data = {
+                'provider_id': item_split[0],
+                'disp_id': item_split[1],
+                'inv_no': item_split[2],
+                'presc_date': item_split[5],
+                'disp_date': item_split[6],
+                'license_id': item_split[7],
+                'disp_status': item_split[15],
+                'practitioner': license_mapping[item_split[7][0]],
+                'items': []
+            }
+            disp_items[item_data['disp_id']] = item_data
+        for item in detail_disps:
+            item_split = item.split('|')
+            item_details_data = {
+                'disp_id': item_split[0],
+                'product_cat': item_split[1],
+                'local_drug_id': item_split[2],
+                'standard_drug_id': item_split[3],
+                'dfs': item_split[5],
+                'package_size': item_split[6],
+                'instruction_code': item_split[7],
+                'instruction_text': item_split[8],
+                'quantity': item_split[9],
+                # 'prd_code': item_split[14],
+                # 'multiple_disp': item_split[17],
+                # 'supply_for': item_split[18],
+            }
+            current_items = disp_items[item_details_data['disp_id']]['items']
+            current_items.append(item_details_data)
+            disp_items[item_details_data['disp_id']]['items'] = current_items
+        return disp_items
+
+
+def execute(bill_trans_xml_path: str, bill_disp_xml_path: str):
+    bill_trans_data = open_bill_trans_xml(bill_trans_xml_path)
+    bill_disp_xml_data = open_bill_disp_xml(bill_disp_xml_path)
+
+    # SEND ORGANIZATION DATA
+    oraganization_bundle = Bundle(BundleType.Batch,
+                                  [Organization(bill_trans_data.hospital_name, hospital_blockchain_address,
+                                                bill_trans_data.hospital_code).create_entry()])
+    send_bundle(oraganization_bundle)
+
+    # Generate FHIR Resource for each person
+    for disp_id, info in bill_disp_xml_data.items():
+        bill_trans_item = bill_trans_data.items[info['inv_no']]
+        combined_data = {**info}
+        Patient(personal_id=bill_trans_item.pid, combine_name_surname=bill_trans_item.name)

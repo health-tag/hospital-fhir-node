@@ -1,12 +1,12 @@
- #!/usr/bin/python
- # -*- coding: utf-8 -*-
+# !/usr/bin/python
+# -*- coding: utf-8 -*-
 
 import xmltodict
 import requests
 import glob
 import re
 import json
-from mapping_key import license_mapping,disp_status_mapping,prd_code_flag
+from mapping_key import license_mapping, disp_status_mapping, prd_code_flag
 
 tran_items = {}
 disp_items = {}
@@ -15,10 +15,9 @@ detail_items = {}
 headers = {
     'apikey': ''
 }
-#base_fhir_url = 'http://localhost:8080/fhir-api-key-auth'
+# base_fhir_url = 'http://localhost:8080/fhir-api-key-auth'
 base_fhir_url = 'http://localhost:8080/fhir'
 hos_addr = '0xC88a594dBB4e9F1ce15d59D0ED129b92E6d89884'
-
 
 files = glob.glob("./uploads/*")
 bill_trans = ''
@@ -29,13 +28,16 @@ for file in files:
     elif 'BILLDISP' in file:
         bill_disp = file
 
+
 def get_file_encoding(file_path):
     with open(file_path) as xml_file_for_encoding_check:
         first_line = xml_file_for_encoding_check.readline()
-        encoding = re.search('encoding="(.*)"',first_line).group(1)
+        encoding = re.search('encoding="(.*)"', first_line).group(1)
         if encoding == "windows-874":
             encoding = "cp874"
         return encoding
+
+
 bill_trans_encoding = get_file_encoding(bill_trans)
 bill_disp_encoding = get_file_encoding(bill_disp)
 
@@ -77,7 +79,7 @@ with open(bill_trans, encoding=bill_trans_encoding) as xml_file:
     #     items.append(item_da)
     #     tran_items[inv_no] = items
 
-with open(bill_disp,  encoding=bill_disp_encoding) as xml_file:
+with open(bill_disp, encoding=bill_disp_encoding) as xml_file:
     data_dict = xmltodict.parse(xml_file.read())
     main_disps = data_dict['ClaimRec']['Dispensing'].split('\n')
     detail_disps = data_dict['ClaimRec']['DispensedItems'].split('\n')
@@ -85,7 +87,7 @@ with open(bill_disp,  encoding=bill_disp_encoding) as xml_file:
         item_split = item.split('|')
         item_data = {
             'provider_id': item_split[0],
-            'disp_id':item_split[1],
+            'disp_id': item_split[1],
             'inv_no': item_split[2],
             'presc_date': item_split[5],
             'disp_date': item_split[6],
@@ -98,7 +100,7 @@ with open(bill_disp,  encoding=bill_disp_encoding) as xml_file:
     for item in detail_disps:
         item_split = item.split('|')
         item_details_data = {
-            'disp_id':item_split[0],
+            'disp_id': item_split[0],
             'product_cat': item_split[1],
             'local_drug_id': item_split[2],
             'standard_drug_id': item_split[3],
@@ -199,7 +201,7 @@ for disp_id, info in disp_items.items():
                 "context": {
                     "reference": f"urn:uuid:Encounter/D/{item_combined_data['disp_id']}"
                 },
-               "performer": [
+                "performer": [
                     {
                         "actor": {
                             "reference": f"urn:uuid:Organization/{hos_addr}"
@@ -461,4 +463,3 @@ for disp_id, info in disp_items.items():
     res = requests.post(base_fhir_url, json=json_data, headers=headers)
     print(res.status_code)
     print(res.content)
-

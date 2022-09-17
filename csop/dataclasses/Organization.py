@@ -3,8 +3,6 @@ from Entry import Entry
 
 
 class Organization(FHIRResource):
-    identifier = None
-
     _hospital_name: str = None
     _hospital_blockchain_address: str = None
     _hospital_code: str = None

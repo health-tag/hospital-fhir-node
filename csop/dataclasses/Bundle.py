@@ -32,10 +32,10 @@ hospital_name = "Siriraj"
 hospital_code = "X12"
 oraganizationEntry = Organization(hospital_blockchain_address=hospital_blockchain_address, hospital_name=hospital_name,
                                   hospital_code=hospital_code).create_entry()
-patientEntry = Patient(name="John", surname="Marstro", thai_citizen_id="1700", hospital_number="11674",
+patientEntry = Patient(name="John", surname="Marstro", personal_id="1700", hospital_number="11674",
                        hospital_blockchain_address=hospital_blockchain_address, hospital_code=hospital_code).create_entry()
-patientEntry2 = Patient(name="William", surname="Runtherford", thai_citizen_id="1700", hospital_number="15546",
-                       hospital_blockchain_address=hospital_blockchain_address, hospital_code=hospital_code).create_entry()
+patientEntry2 = Patient(name="William", surname="Runtherford", personal_id="1700", hospital_number="15546",
+                        hospital_blockchain_address=hospital_blockchain_address, hospital_code=hospital_code).create_entry()
 
 root_bundle = Bundle(BundleType.Batch,
                      [oraganizationEntry, Bundle(BundleType.Transaction, [patientEntry, patientEntry2])])

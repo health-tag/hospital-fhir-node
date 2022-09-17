@@ -5,6 +5,7 @@ import requests
 import xmltodict
 
 from csop.dataclasses.Bundle import Bundle, BundleType
+from csop.dataclasses.MedicationDispense import MedicationDispense
 from csop.dataclasses.Organization import Organization
 from csop.dataclasses.Patient import Patient
 from csop.utilities.mapping_key import license_mapping
@@ -38,6 +39,40 @@ class BillTrans:
         self.hospital_code = hospital_code
         self.hospital_name = hospital_name
 
+
+class DispensingItemDetail:
+
+    def __init__(self,disp_id:str,product_cat:str,local_drug_id:str,standard_drug_id:str,dfs:str,package_size:str,instruction_code:str,instruction_text:str,quantity:str):
+
+    'disp_id': item_split[0],
+    'product_cat': item_split[1],
+    'local_drug_id': item_split[2],
+    'standard_drug_id': item_split[3],
+    'dfs': item_split[5],
+    'package_size': item_split[6],
+    'instruction_code': item_split[7],
+    'instruction_text': item_split[8],
+    'quantity': item_split[9],
+    # 'prd_code': item_split[14],
+    # 'multiple_disp': item_split[17],
+    # 'supply_for': item_split[18],
+
+class DispensingItem:
+    _practitioner:str
+    @property
+    def practitioner(self):
+        return license_mapping[self._practitioner]
+
+    def __init__(self, provider_id: str, disp_id: str, inv_no: str, presc_date: str, disp_date: str, license_id: str, disp_status: str, practitioner:str, items: DispensingItemDetail[]):
+        self.items = items
+        self._practitioner = practitioner
+        self.disp_status = disp_status
+        self.license_id = license_id
+        self.disp_date = disp_date
+        self.presc_date = presc_date
+        self.inv_no = inv_no
+        self.disp_id = disp_id
+        self.provider_id = provider_id
 
 def get_file_encoding(file_path):
     with open(file_path) as xml_file_for_encoding_check:
@@ -129,4 +164,7 @@ def execute(bill_trans_xml_path: str, bill_disp_xml_path: str):
     for disp_id, info in bill_disp_xml_data.items():
         bill_trans_item = bill_trans_data.items[info['inv_no']]
         combined_data = {**info}
-        Patient(personal_id=bill_trans_item.pid, combine_name_surname=bill_trans_item.name)
+        Patient(combine_name_surname=bill_trans_item.name, personal_id=bill_trans_item.pid,
+                hospital_number=bill_trans_item.hn, hospital_blockchain_address=hospital_blockchain_address,
+                hospital_code=bill_trans_data.hospital_code, member_number=bill_trans_item.member_no)
+        MedicationDispense()

@@ -1,4 +1,4 @@
-from Base import FHIRResource
+from csop.FHIR.Base import FHIRResource
 
 
 class Entry:

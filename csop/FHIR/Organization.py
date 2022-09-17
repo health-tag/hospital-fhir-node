@@ -1,5 +1,5 @@
-from Base import FHIRResource
-from Entry import Entry
+from csop.FHIR.Base import FHIRResource
+from csop.FHIR.Entry import Entry
 
 
 class Organization(FHIRResource):
@@ -16,7 +16,7 @@ class Organization(FHIRResource):
         return [
             {
                 "system": "https://bps.moph.go.th/hcode/5",
-                "value": f"{self.hospital_code}"
+                "value": f"{self._hospital_code}"
             }
         ]
 
@@ -35,4 +35,5 @@ class Organization(FHIRResource):
         return entry
 
     def __getstate__(self):
-        return super.__getstate__(self)
+        return super().__getstate__()
+

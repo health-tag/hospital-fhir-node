@@ -1,22 +1,3 @@
-license_mapping = {
-    'ว': {
-        'type': 'MD',
-        'system': 'https://www.tmc.or.th'
-    },
-    'ท': {
-        'type': 'DDS',
-        'system': 'https://www.dentalcouncil.or.th'
-    },
-    'พ': {
-        'type': 'NP',
-        'system': 'https://www.tnmc.or.th'
-    },
-    'ภ': {
-        'type': 'RPH',
-        'system': 'https://www.pharmacycouncil.org'
-    }
-}
-
 disp_status_mapping = {
     '0': 'cancelled',
     '1': 'completed',

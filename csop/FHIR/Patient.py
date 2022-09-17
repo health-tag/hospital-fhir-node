@@ -1,5 +1,5 @@
-from Base import FHIRResource
-from Entry import Entry
+from csop.FHIR.Base import FHIRResource
+from csop.FHIR.Entry import Entry
 
 
 class Patient(FHIRResource):
@@ -10,6 +10,30 @@ class Patient(FHIRResource):
     _hospital_blockchain_address: str = None
     _hospital_code: str = None
     _member_number: str = None
+
+    def __init__(self, personal_id: str, hospital_number: str,
+                 hospital_blockchain_address: str, hospital_code: str, member_number: str = None,
+                 combine_name_surname: str = None, name: str = None, surname: str = None):
+        super(Patient, self).__init__(resource_type="Patient")
+        self._name = name
+        self._surname = surname
+        self._combine_name_surname = combine_name_surname
+        self._personal_id = personal_id
+        self._hospital_number = hospital_number
+        self._member_number = member_number
+        self._hospital_blockchain_address = hospital_blockchain_address
+        self._hospital_code = hospital_code
+
+    def create_entry(self) -> Entry:
+        entry = Entry(f"urn:uuid:Patient/{self._hospital_code}/{self._hospital_number}", self, {
+            "method": "PUT",
+            "url": f"Patient?identifier=https://sil-th.org/CSOP/hn|{self._hospital_number}",
+            "ifNoneExist": f"identifier=https://sil-th.org/CSOP/hn|{self._hospital_number}"
+        })
+        return entry
+
+    def __getstate__(self):
+        return super().__getstate__()
 
     @property
     def name(self) -> list[dict[str, str | dict[str, str]]]:
@@ -67,27 +91,3 @@ class Patient(FHIRResource):
         return {
             "reference": f"Organization/{self._hospital_blockchain_address}"
         }
-
-    def __init__(self, personal_id: str, hospital_number: str,
-                 hospital_blockchain_address: str, hospital_code: str, member_number: str = None,
-                 combine_name_surname: str = None, name: str = None, surname: str = None):
-        super(Patient, self).__init__(resource_type="Patient")
-        self._name = name
-        self._surname = surname
-        self._combine_name_surname = combine_name_surname
-        self._personal_id = personal_id
-        self._hospital_number = hospital_number
-        self._member_number = member_number
-        self._hospital_blockchain_address = hospital_blockchain_address
-        self._hospital_code = hospital_code
-
-    def create_entry(self) -> Entry:
-        entry = Entry(f"urn:uuid:Patient/{self._hospital_code}/{self._hospital_number}", self, {
-            "method": "PUT",
-            "url": f"Patient?identifier=https://sil-th.org/CSOP/hn|{self._hospital_number}",
-            "ifNoneExist": f"identifier=https://sil-th.org/CSOP/hn|{self._hospital_number}"
-        })
-        return entry
-
-    def __getstate__(self):
-        return super.__getstate__(self)

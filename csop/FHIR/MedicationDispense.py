@@ -1,7 +1,7 @@
-from typing import List, Dict
+from typing import Dict, Set
 
-from Base import FHIRResource
-from Entry import Entry
+from csop.FHIR.Base import FHIRResource
+from csop.FHIR.Entry import Entry
 from csop.utilities.mapping_key import disp_status_mapping
 
 
@@ -16,14 +16,14 @@ class MedicationDispense(FHIRResource):
     _package_size: str
     _instruction_text: str
     _instruction_code: str
-    _belonged_to_hospital_number: str = None
-
-    _hospital_blockchain_address: str = None
-    _hospital_code: str = None
+    whenHandedOver: str = None  # disp_date
+    _belonged_to_hospital_number: str
+    _hospital_blockchain_address: str
+    _hospital_code: str
 
     def __init__(self, disp_id: str, disp_status: str, local_drug_id: str, standard_drug_id: str, product_cat: str,
                  dfs: str,
-                 quantity: str, package_size: str,
+                 quantity: str, package_size: str, disp_date: str,
                  instruction_text: str, instruction_code: str,
                  belonged_to_hospital_number: str, hospital_code: str, hospital_blockchain_address: str):
         super(MedicationDispense, self).__init__(resource_type="MedicationDispense")
@@ -38,6 +38,8 @@ class MedicationDispense(FHIRResource):
         self._package_size = package_size
         self._instruction_text = instruction_text
         self._instruction_code = instruction_code
+        self.category = MedicationDispense.category
+        self.whenHandedOver = disp_date
 
         self._belonged_to_hospital_number = belonged_to_hospital_number
         self._hospital_code = hospital_code
@@ -52,7 +54,7 @@ class MedicationDispense(FHIRResource):
         return entry
 
     def __getstate__(self):
-        return super.__getstate__(self)
+        return super().__getstate__()
 
     @property
     def text(self) -> dict[str, str]:
@@ -132,19 +134,17 @@ class MedicationDispense(FHIRResource):
         return [
             {
                 "actor": {
-                    "reference": f"urn:uuid:Organization/{self._hospital_blockchain_address}"
+                    "reference": f"Organization/{self._hospital_blockchain_address}"
                 }
             }
         ]
 
     @property
-    def quantity(self) -> dict[str, str]:
+    def quantity(self) -> dict[str, set[str]]:
         return {
-            "value": f"urn:uuid:Encounter/D/{self._quantity}",
-            "unit": f"urn:uuid:Encounter/D/{self._package_size}"
+            "value": {self._quantity},
+            "unit": {self._package_size}
         }
-
-    whenHandedOver: str = None  # disp_date
 
     @property
     def dosageInstruction(self) -> list[dict[str, str]]:

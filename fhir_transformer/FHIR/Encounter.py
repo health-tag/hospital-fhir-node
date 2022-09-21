@@ -33,7 +33,7 @@ class EncounterDispensing(FHIRResource):
         self.serviceType = EncounterDispensing.serviceType
 
     def create_entry(self) -> Entry:
-        entry = Entry(f"urn:uuid:Encounter/D/{self._disp_id}", self, {
+        entry = Entry(f"Encounter/{self._disp_id}", self, {
             "method": "PUT",
             "url": f"Encounter?identifier=https://sil-th.org/CSOP/dispenseId|{self._disp_id}",
             "ifNoneExist": f"identifier=https://sil-th.org/CSOP/dispenseId|{self._disp_id}"
@@ -77,7 +77,7 @@ class EncounterDispensing(FHIRResource):
     @property
     def subject(self) -> dict[str, str]:
         return {
-            "reference": f"urn:uuid:Patient/{self._hospital_code}/{self._belonged_to_hospital_number}"
+            "reference": f"Patient?identifier=https://sil-th.org/CSOP/hn|{self._belonged_to_hospital_number}"
         }
 
     @property

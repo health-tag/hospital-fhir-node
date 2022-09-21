@@ -27,7 +27,7 @@ class Organization(FHIRResource):
         self._hospital_code = hospital_code
 
     def create_entry(self) -> Entry:
-        entry = Entry(f"urn:uuid:Organization/{self._hospital_blockchain_address}", self, {
+        entry = Entry(f"Organization/{self._hospital_blockchain_address}", self, {
             "method": "PUT",
             "url": f"Organization/{self._hospital_blockchain_address}",
             "ifNoneExist": f"identifier=https://bps.moph.go.th/hcode/5|{self._hospital_code}"

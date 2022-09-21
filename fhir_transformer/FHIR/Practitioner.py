@@ -38,7 +38,7 @@ class Practitioner(FHIRResource):
         self._license_id = license_id
 
     def create_entry(self) -> Entry:
-        entry = Entry(f"urn:uuid:Practitioner/{self.license_system.type}/{self.license_number_part}", self, {
+        entry = Entry(f"Practitioner?identifier={self.license_system.system}|{self.license_number_part}", self, {
             "method": "PUT",
             "url": f"Practitioner?identifier={self.license_system.system}|{self.license_number_part}",
             "ifNoneExist": f"identifier={self.license_system.system}|{self.license_number_part}"

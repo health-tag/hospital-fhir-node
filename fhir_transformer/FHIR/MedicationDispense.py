@@ -44,7 +44,7 @@ class MedicationDispense(FHIRResource):
         self._hospital_blockchain_address = hospital_blockchain_address
 
     def create_entry(self) -> Entry:
-        entry = Entry(f"urn:uuid:MedicationDispense/{self._disp_id}/{self._local_drug_id}", self, {
+        entry = Entry(f"MedicationDispense/{self._disp_id}|{self._local_drug_id}", self, {
             "method": "PUT",
             "url": f"MedicationDispense?identifier=https://sil-th.org/CSOP/dispenseId|{self._disp_id}&code=https://sil-th.org/CSOP/localCode|{self._local_drug_id}",
             "ifNoneExist": f"identifier=https://sil-th.org/CSOP/dispenseId|{self._disp_id}&code=https://sil-th.org/CSOP/localCode|{self._local_drug_id}"
@@ -118,13 +118,13 @@ class MedicationDispense(FHIRResource):
     @property
     def subject(self) -> dict[str, str]:
         return {
-            "reference": f"urn:uuid:Patient/{self._hospital_code}/{self._belonged_to_hospital_number}",
+            "reference": f"Patient?identifier=https://sil-th.org/CSOP/hn|{self._belonged_to_hospital_number}",
         }
 
     @property
     def context(self) -> dict[str, str]:
         return {
-            "reference": f"urn:uuid:Encounter/D/{self._disp_id}"
+            "reference": f"Encounter?identifier=https://sil-th.org/CSOP/dispenseId|{self._disp_id}"
         }
 
     @property

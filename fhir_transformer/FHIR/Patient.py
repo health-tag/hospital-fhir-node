@@ -25,7 +25,9 @@ class Patient(FHIRResource):
         self._hospital_code = hospital_code
 
     def create_entry(self) -> Entry:
-        entry = Entry(f"urn:uuid:Patient/{self._hospital_code}/{self._hospital_number}", self, {
+        # Note: urn:uuid: is only working in transaction only. It's better to use full URL instead
+        # Old urn urn:uuid:Patient/{self._hospital_code}/{self._hospital_number}
+        entry = Entry(f"Patient?identifier=https://sil-th.org/CSOP/hn|{self._hospital_number}", self, {
             "method": "PUT",
             "url": f"Patient?identifier=https://sil-th.org/CSOP/hn|{self._hospital_number}",
             "ifNoneExist": f"identifier=https://sil-th.org/CSOP/hn|{self._hospital_number}"

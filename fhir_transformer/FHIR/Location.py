@@ -14,7 +14,7 @@ class Location(FHIRResource):
         self._hospital_blockchain_address = hospital_blockchain_address
 
     def create_entry(self) -> Entry:
-        entry = Entry(f"urn:uuid:Location/{self._station}", self, {
+        entry = Entry(f"Location?identifier=https://sil-th.org/CSOP/station|{self._station}", self, {
             "method": "PUT",
             "url": f"Location?identifier=https://sil-th.org/CSOP/station|{self._station}",
             "ifNoneExist": f"identifier=https://sil-th.org/CSOP/station|{self._station}"

@@ -24,6 +24,9 @@ services:
   hapi-fhir-jpaserver-start:
     image: "hapiproject/hapi:latest"
     container_name: hapi-fhir-jpaserver-start
+    environment:
+      - hapi.fhir.bulk_import_enabled=true
+      - hapi.fhir.bulk_export_enabled=true
     volumes:
       - ./hapi-fhir-server:/data/hapi
     restart: on-failure
@@ -34,15 +37,14 @@ services:
     networks:
       - hapi-fhir-network
 
-  hapi-fhir-mysql:
-    image: mysql:latest
-    container_name: hapi-fhir-mysql
-    command: --lower_case_table_names=1
+  hapi-fhir-postgres:
+    image: postgres:latest
+    container_name: hapi-fhir-postgres
     restart: always
     env_file:
-      - .hapimysqlenv
+      - .hapipostgresenv
     volumes:
-      - ./hapi-fhir-mysql:/var/lib/mysql
+      - ./hapi-fhir-postgres:/var/lib/postgresql/data
 
   db:
     image: postgres:11-alpine
@@ -106,7 +108,7 @@ services:
       - "1337:1337"
 
 volumes:
-  hapi-fhir-mysql:
+  hapi-fhir-postgres:
   hapi-fhir-server:
   kong-db:
 networks:

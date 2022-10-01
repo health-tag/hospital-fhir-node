@@ -3,14 +3,6 @@ from fhir_transformer.FHIR.Entry import Entry
 
 
 class Patient(FHIRResource):
-    _name: str
-    _surname: str
-    _personal_id: str
-    _hospital_number: str = None
-    _hospital_blockchain_address: str = None
-    _hospital_code: str = None
-    _member_number: str = None
-
     def __init__(self, personal_id: str, hospital_number: str,
                  hospital_blockchain_address: str, hospital_code: str, member_number: str = None,
                  combine_name_surname: str = None, name: str = None, surname: str = None):
@@ -25,7 +17,9 @@ class Patient(FHIRResource):
         self._hospital_code = hospital_code
 
     def create_entry(self) -> Entry:
-        entry = Entry(f"urn:uuid:Patient/{self._hospital_code}/{self._hospital_number}", self, {
+        # Note: urn:uuid: is only working in transaction only. It's better to use full URL instead
+        # Old urn urn:uuid:Patient/{self._hospital_code}/{self._hospital_number}
+        entry = Entry(f"Patient?identifier=https://sil-th.org/CSOP/hn|{self._hospital_number}", self, {
             "method": "PUT",
             "url": f"Patient?identifier=https://sil-th.org/CSOP/hn|{self._hospital_number}",
             "ifNoneExist": f"identifier=https://sil-th.org/CSOP/hn|{self._hospital_number}"

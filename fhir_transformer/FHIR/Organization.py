@@ -3,10 +3,6 @@ from fhir_transformer.FHIR.Entry import Entry
 
 
 class Organization(FHIRResource):
-    _hospital_name: str = None
-    _hospital_blockchain_address: str = None
-    _hospital_code: str = None
-
     @property
     def name(self) -> str:
         return self._hospital_name
@@ -27,7 +23,7 @@ class Organization(FHIRResource):
         self._hospital_code = hospital_code
 
     def create_entry(self) -> Entry:
-        entry = Entry(f"urn:uuid:Organization/{self._hospital_blockchain_address}", self, {
+        entry = Entry(f"Organization/{self._hospital_blockchain_address}", self, {
             "method": "PUT",
             "url": f"Organization/{self._hospital_blockchain_address}",
             "ifNoneExist": f"identifier=https://bps.moph.go.th/hcode/5|{self._hospital_code}"

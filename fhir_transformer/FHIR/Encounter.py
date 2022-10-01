@@ -1,19 +1,9 @@
 from fhir_transformer.FHIR.Base import FHIRResource
 from fhir_transformer.FHIR.Entry import Entry
-from fhir_transformer.csop.mapping_key import disp_status_mapping
+from fhir_transformer.mapping_keys.csop import disp_status_mapping
 
 
 class EncounterDispensing(FHIRResource):
-    _disp_id: str
-    _presc_date: str
-    _disp_date: str
-    _disp_status: str
-    _belonged_to_hospital_number: str
-    _hospital_code: str
-    _hospital_blockchain_address: str
-    _practitioner_system: str
-    _practitioner_license_number_part: str
-
     def __init__(self, disp_id: str, presc_date: str, disp_date: str, disp_status: str,
                  belonged_to_hospital_number: str, practitioner_system: str, practitioner_license_number_part: str,
                  hospital_code: str, hospital_blockchain_address: str):
@@ -33,7 +23,7 @@ class EncounterDispensing(FHIRResource):
         self.serviceType = EncounterDispensing.serviceType
 
     def create_entry(self) -> Entry:
-        entry = Entry(f"urn:uuid:Encounter/D/{self._disp_id}", self, {
+        entry = Entry(f"Encounter/{self._disp_id}", self, {
             "method": "PUT",
             "url": f"Encounter?identifier=https://sil-th.org/CSOP/dispenseId|{self._disp_id}",
             "ifNoneExist": f"identifier=https://sil-th.org/CSOP/dispenseId|{self._disp_id}"
@@ -77,7 +67,7 @@ class EncounterDispensing(FHIRResource):
     @property
     def subject(self) -> dict[str, str]:
         return {
-            "reference": f"urn:uuid:Patient/{self._hospital_code}/{self._belonged_to_hospital_number}"
+            "reference": f"Patient?identifier=https://sil-th.org/CSOP/hn|{self._belonged_to_hospital_number}"
         }
 
     @property

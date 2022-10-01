@@ -1,5 +1,6 @@
 
 hospital_blockchain_address = '0xC88a594dBB4e9F1ce15d59D0ED129b92E6d89884'
+hospital_name_43folders = 'Your hospital'
 
 base_fhir_url = 'http://localhost:8080/fhir'
 headers = {

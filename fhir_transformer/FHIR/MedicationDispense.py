@@ -1,24 +1,9 @@
 from fhir_transformer.FHIR.Base import FHIRResource
 from fhir_transformer.FHIR.Entry import Entry
-from fhir_transformer.csop.mapping_key import disp_status_mapping
+from fhir_transformer.mapping_keys.csop import disp_status_mapping
 
 
 class MedicationDispense(FHIRResource):
-    _disp_id: str
-    _disp_status: str
-    _local_drug_id: str
-    _standard_drug_id: str
-    _product_cat: str
-    _dfs: str
-    _quantity: str
-    _package_size: str
-    _instruction_text: str
-    _instruction_code: str
-    whenHandedOver: str = None  # disp_date
-    _belonged_to_hospital_number: str
-    _hospital_blockchain_address: str
-    _hospital_code: str
-
     def __init__(self, disp_id: str, disp_status: str, local_drug_id: str, standard_drug_id: str, product_cat: str,
                  dfs: str,
                  quantity: str, package_size: str, disp_date: str,
@@ -44,7 +29,7 @@ class MedicationDispense(FHIRResource):
         self._hospital_blockchain_address = hospital_blockchain_address
 
     def create_entry(self) -> Entry:
-        entry = Entry(f"urn:uuid:MedicationDispense/{self._disp_id}/{self._local_drug_id}", self, {
+        entry = Entry(f"MedicationDispense/{self._disp_id}|{self._local_drug_id}", self, {
             "method": "PUT",
             "url": f"MedicationDispense?identifier=https://sil-th.org/CSOP/dispenseId|{self._disp_id}&code=https://sil-th.org/CSOP/localCode|{self._local_drug_id}",
             "ifNoneExist": f"identifier=https://sil-th.org/CSOP/dispenseId|{self._disp_id}&code=https://sil-th.org/CSOP/localCode|{self._local_drug_id}"
@@ -118,13 +103,13 @@ class MedicationDispense(FHIRResource):
     @property
     def subject(self) -> dict[str, str]:
         return {
-            "reference": f"urn:uuid:Patient/{self._hospital_code}/{self._belonged_to_hospital_number}",
+            "reference": f"Patient?identifier=https://sil-th.org/CSOP/hn|{self._belonged_to_hospital_number}",
         }
 
     @property
     def context(self) -> dict[str, str]:
         return {
-            "reference": f"urn:uuid:Encounter/D/{self._disp_id}"
+            "reference": f"Encounter?identifier=https://sil-th.org/CSOP/dispenseId|{self._disp_id}"
         }
 
     @property

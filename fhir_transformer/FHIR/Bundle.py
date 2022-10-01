@@ -22,9 +22,6 @@ class BundleType(Enum):
 
 class Bundle:
     resourceType = "Bundle"
-    type: BundleType
-    entry: list[Entry]
-
     def __init__(self, bundle_type: BundleType, entries: list[Entry]):
         self.type = bundle_type
         self.entry = entries

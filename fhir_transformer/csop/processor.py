@@ -1,4 +1,5 @@
 import math
+from dataclasses import dataclass
 from datetime import datetime
 
 from fhir_transformer.FHIR.Bundle import Bundle, BundleType
@@ -11,6 +12,16 @@ from fhir_transformer.FHIR.Practitioner import Practitioner
 from fhir_transformer.csop.xml_extractor import _open_bill_trans_xml, _open_bill_disp_xml
 from fhir_transformer.fhir_transformer_config import hospital_blockchain_address, max_patient_per_cycle
 from fhir_transformer.utilities.networking import send_bundle
+
+@dataclass
+class EntryResult:
+    status: str
+    location: str | None
+
+@dataclass
+class ResourceResult:
+    resourceName: str
+    entries: list[EntryResult]
 
 
 def process(bill_trans_xml_path: str, bill_disp_xml_path: str):
@@ -88,7 +99,6 @@ def process(bill_trans_xml_path: str, bill_disp_xml_path: str):
     practitioners_bundle = Bundle(BundleType.Batch, [entry.create_entry() for entry in list(practitioners.values())])
     send_bundle(practitioners_bundle)
     # PREPARE PATIENT + ENCOUNTER + MEDICAL DISPENSING
-    patient_transaction_bundle = list()
     cycle = 0
     cycle_entries = list()
     patients_count = len(patients.keys())
@@ -106,8 +116,4 @@ def process(bill_trans_xml_path: str, bill_disp_xml_path: str):
             send_bundle(Bundle(BundleType.Transaction, cycle_entries))
             cycle = cycle + 1
             cycle_entries.clear()
-        # patient_transaction_bundle.append(Bundle(BundleType.Transaction, entry).create_entry(i)) # FHIR IS NOT SUPPORT BUNDLE OF TRANSACTION!
-        # patient_transaction_bundle.append(Bundle(BundleType.Transaction, entry).create_entry(i))
-    # SEND PATIENT + ENCOUNTER + MEDICAL DISPENSING
-    # send_bundle(Bundle(BundleType.Batch, patient_transaction_bundle))# FHIR IS NOT SUPPORT BUNDLE OF TRANSACTION!
     # endregion

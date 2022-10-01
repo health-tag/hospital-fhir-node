@@ -1,19 +1,9 @@
 from fhir_transformer.FHIR.Base import FHIRResource
 from fhir_transformer.FHIR.Entry import Entry
-from fhir_transformer.csop.mapping_key import disp_status_mapping
+from fhir_transformer.mapping_keys.csop import disp_status_mapping
 
 
 class EncounterDispensing(FHIRResource):
-    _disp_id: str
-    _presc_date: str
-    _disp_date: str
-    _disp_status: str
-    _belonged_to_hospital_number: str
-    _hospital_code: str
-    _hospital_blockchain_address: str
-    _practitioner_system: str
-    _practitioner_license_number_part: str
-
     def __init__(self, disp_id: str, presc_date: str, disp_date: str, disp_status: str,
                  belonged_to_hospital_number: str, practitioner_system: str, practitioner_license_number_part: str,
                  hospital_code: str, hospital_blockchain_address: str):

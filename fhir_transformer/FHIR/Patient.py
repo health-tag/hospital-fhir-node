@@ -3,14 +3,6 @@ from fhir_transformer.FHIR.Entry import Entry
 
 
 class Patient(FHIRResource):
-    _name: str
-    _surname: str
-    _personal_id: str
-    _hospital_number: str = None
-    _hospital_blockchain_address: str = None
-    _hospital_code: str = None
-    _member_number: str = None
-
     def __init__(self, personal_id: str, hospital_number: str,
                  hospital_blockchain_address: str, hospital_code: str, member_number: str = None,
                  combine_name_surname: str = None, name: str = None, surname: str = None):

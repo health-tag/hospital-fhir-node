@@ -13,6 +13,10 @@ actual_header = {
 def send_bundle(bundle: Bundle):
     payload = jsonpickle.encode(bundle, unpicklable=False)
     res = requests.post(base_fhir_url, data=payload, headers=actual_header)
-    print(f"Bundle HTTP status code {res.status_code}")
-    print(f"Bundle response")
+    ###fes.status_code == 200 r:
+    #     print(f"OK")
+    #else:
+    #    print(f"Bundle HTTP status code {res.status_code}")
+    #    print(f"Bundle response")
     print(res.content)
+

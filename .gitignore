@@ -1,6 +1,7 @@
 .DS_Store
 site-packages
 hapi-fhir-mysql
+hapi-fhir-postgres
 __pycache__
 uploads/csop/*
 uploads/43folders/*.txt

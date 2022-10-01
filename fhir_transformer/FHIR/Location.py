@@ -5,9 +5,6 @@ from fhir_transformer.FHIR.Entry import Entry
 
 
 class Location(FHIRResource):
-    _station: str
-    _hospital_blockchain_address: str
-
     def __init__(self, station: str, hospital_blockchain_address: str):
         super(Location, self).__init__(resource_type="Location")
         self._station = station

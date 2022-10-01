@@ -1,24 +1,9 @@
 from fhir_transformer.FHIR.Base import FHIRResource
 from fhir_transformer.FHIR.Entry import Entry
-from fhir_transformer.csop.mapping_key import disp_status_mapping
+from fhir_transformer.mapping_keys.csop import disp_status_mapping
 
 
 class MedicationDispense(FHIRResource):
-    _disp_id: str
-    _disp_status: str
-    _local_drug_id: str
-    _standard_drug_id: str
-    _product_cat: str
-    _dfs: str
-    _quantity: str
-    _package_size: str
-    _instruction_text: str
-    _instruction_code: str
-    whenHandedOver: str = None  # disp_date
-    _belonged_to_hospital_number: str
-    _hospital_blockchain_address: str
-    _hospital_code: str
-
     def __init__(self, disp_id: str, disp_status: str, local_drug_id: str, standard_drug_id: str, product_cat: str,
                  dfs: str,
                  quantity: str, package_size: str, disp_date: str,

@@ -69,7 +69,6 @@ class Practitioner(FHIRResource):
 
     @property
     def identifier(self) -> list[dict[str, str | dict[str, str]]]:
-        id = self._license_id[1:]
         return [
             {
                 "type": {

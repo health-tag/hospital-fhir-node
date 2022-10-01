@@ -3,10 +3,6 @@ from fhir_transformer.FHIR.Entry import Entry
 
 
 class Organization(FHIRResource):
-    _hospital_name: str = None
-    _hospital_blockchain_address: str = None
-    _hospital_code: str = None
-
     @property
     def name(self) -> str:
         return self._hospital_name

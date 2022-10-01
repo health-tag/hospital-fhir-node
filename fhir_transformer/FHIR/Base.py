@@ -3,8 +3,6 @@ from typing import Any
 
 
 class FHIRResource:
-    resourceType: str
-
     def __init__(self, resource_type: str):
         self.resourceType = resource_type
 

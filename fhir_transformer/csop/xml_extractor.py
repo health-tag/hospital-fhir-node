@@ -6,7 +6,7 @@ from fhir_transformer.csop.holder import BillTransItem, BillTrans, DispensingIte
 
 
 def _get_file_encoding(file_path):
-    with open(file_path) as xml_file_for_encoding_check:
+    with open(file_path, encoding="utf-8") as xml_file_for_encoding_check:
         first_line = xml_file_for_encoding_check.readline()
         encoding = re.search('encoding="(.*)"', first_line).group(1)
         if encoding == "windows-874":

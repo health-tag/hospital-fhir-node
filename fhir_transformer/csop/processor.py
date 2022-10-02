@@ -1,9 +1,12 @@
 import math
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Iterable
+from unittest import result
 
 from fhir_transformer.FHIR.Bundle import Bundle, BundleType
 from fhir_transformer.FHIR.Encounter import EncounterDispensing
+from fhir_transformer.FHIR.Entry import Entry
 from fhir_transformer.FHIR.Location import Location
 from fhir_transformer.FHIR.MedicationDispense import MedicationDispense
 from fhir_transformer.FHIR.Organization import Organization
@@ -11,20 +14,13 @@ from fhir_transformer.FHIR.Patient import Patient
 from fhir_transformer.FHIR.Practitioner import Practitioner
 from fhir_transformer.csop.xml_extractor import _open_bill_trans_xml, _open_bill_disp_xml
 from fhir_transformer.fhir_transformer_config import hospital_blockchain_address, max_patient_per_cycle
+from fhir_transformer.utilities.holder import BundleResult, EntryResult
 from fhir_transformer.utilities.networking import send_bundle
 
-@dataclass
-class EntryResult:
-    status: str
-    location: str | None
 
-@dataclass
-class ResourceResult:
-    resourceName: str
-    entries: list[EntryResult]
+def process(bill_trans_xml_path: str, bill_disp_xml_path: str) -> list[BundleResult]:
+    results = list[BundleResult]()
 
-
-def process(bill_trans_xml_path: str, bill_disp_xml_path: str):
     bill_trans_xml_data = _open_bill_trans_xml(bill_trans_xml_path)
     bill_disp_xml_data = _open_bill_disp_xml(bill_disp_xml_path)
 
@@ -34,7 +30,7 @@ def process(bill_trans_xml_path: str, bill_disp_xml_path: str):
                                  [Organization(bill_trans_xml_data.hospital_name, hospital_blockchain_address,
                                                bill_trans_xml_data.hospital_code).create_entry()])
 
-    send_bundle(organization_bundle)
+    results.append(send_bundle(organization_bundle))
     # endregion GENERATE + SEND ONE ORGANIZATION DATA
 
     # region GENERATE + SEND UNIQUE LOCATION DATA
@@ -44,7 +40,7 @@ def process(bill_trans_xml_path: str, bill_disp_xml_path: str):
         locations[bill_trans_item.station] = Location(station=bill_trans_item.station,
                                                       hospital_blockchain_address=hospital_blockchain_address)
     locations_bundle = Bundle(BundleType.Batch, [entry.create_entry() for entry in list(locations.values())])
-    send_bundle(locations_bundle)
+    results.append(send_bundle(locations_bundle))
     # endregion GENERATE + SEND UNIQUE LOCATION DATA
 
     # region Generate FHIR Resource for each person
@@ -97,10 +93,18 @@ def process(bill_trans_xml_path: str, bill_disp_xml_path: str):
     # SEND PRACTITIONERS
     print(f"SENDING PRACTITIONERS {datetime.now()}")
     practitioners_bundle = Bundle(BundleType.Batch, [entry.create_entry() for entry in list(practitioners.values())])
-    send_bundle(practitioners_bundle)
-    # PREPARE PATIENT + ENCOUNTER + MEDICAL DISPENSING
+    results.append(send_bundle(practitioners_bundle))
+    # PREPARE PATIENT + ENCOUNTER + MEDICATION DISPENSE
+    results = results + _bundle_cycler("PATIENT", [entry.create_entry() for entry in list(patients.values())])
+    results = results + _bundle_cycler("ENCOUNTER",
+                                       [entry.create_entry() for e in list(encounters.values()) for entry in e])
+    results = results + _bundle_cycler("MEDICATIONDISPENSE",
+                                       [entry.create_entry() for e in list(medicationDispenses.values()) for entry in
+                                        e])
+    return results
+    '''
     cycle = 0
-    cycle_entries = list()
+    cycle_entries = list[Entry]()
     patients_count = len(patients.keys())
     print(
         f"SENDING PATIENT + ENCOUNTER + MEDICAL DISPENSING IN {math.ceil(patients_count / max_patient_per_cycle)} CYCLES {datetime.now()}")
@@ -116,4 +120,20 @@ def process(bill_trans_xml_path: str, bill_disp_xml_path: str):
             send_bundle(Bundle(BundleType.Transaction, cycle_entries))
             cycle = cycle + 1
             cycle_entries.clear()
+    '''
     # endregion
+
+
+def _bundle_cycler(resource_name: str, enumerable: list):
+    results = list[BundleResult]()
+    cycle = 0
+    cycle_entries = list()
+    items_count = len(enumerable)
+    for i in range(0, items_count):
+        cycle_entries.append(enumerable[i])
+        if ((i > 0) and (i % max_patient_per_cycle == 0)) or (i + 1 == items_count):
+            print(f"SENDING {resource_name} CYCLE {cycle + 1} {datetime.now()}")
+            results.append(send_bundle(Bundle(BundleType.Batch, cycle_entries)))
+            cycle = cycle + 1
+            cycle_entries.clear()
+    return results

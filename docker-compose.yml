@@ -7,6 +7,7 @@ services:
       - "8081:3000"
     networks:
       - hapi-fhir-network
+    restart: on-failure
     volumes:
       - ./workingdir:/app/workingdir
 
@@ -15,6 +16,7 @@ services:
     container_name: fhir-transformer
     networks:
       - hapi-fhir-network
+    restart: on-failure
     volumes:
       - ./workingdir:/app/workingdir
     env_file:

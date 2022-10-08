@@ -1,14 +1,24 @@
-version: "3"
+version: "3.9"
 services:
-  upload:
-    image: filebrowser/filebrowser:s6
-    container_name: upload
+  file-uploader:
+    image: healthtag/file-uploader
+    container_name: file-uploader
     ports:
-      - "8888:80"
+      - "8081:3000"
     networks:
       - hapi-fhir-network
     volumes:
-      - ./uploads:/srv
+      - ./workingdir:/app/workingdir
+
+  fhir-transformer:
+    image: healthtag/fhir-transformer
+    container_name: fhir-transformer
+    networks:
+      - hapi-fhir-network
+    volumes:
+      - ./workingdir:/app/workingdir
+    env_file:
+      - .fhir-transformer.env
 
   web:
     build:
@@ -42,14 +52,16 @@ services:
     container_name: hapi-fhir-postgres
     restart: always
     env_file:
-      - .hapipostgresenv
+      - .hapipostgres.env
     volumes:
       - ./hapi-fhir-postgres:/var/lib/postgresql/data
+    networks:
+      - hapi-fhir-network
 
   db:
     image: postgres:11-alpine
     env_file:
-      - .pgenv
+      - .pg.env
     expose:
       - 5432
     networks:
@@ -61,7 +73,7 @@ services:
     image: kong:latest
     user: root
     env_file:
-      - .kongenv
+      - .kong.env
     ports:
       - "8000:8000"
       - "8001:8001"
@@ -89,7 +101,7 @@ services:
       - hapi-fhir-network
     restart: on-failure
     env_file:
-      - .kongenv
+      - .kong.env
     depends_on:
       - db
 
@@ -108,8 +120,6 @@ services:
       - "1337:1337"
 
 volumes:
-  hapi-fhir-postgres:
-  hapi-fhir-server:
   kong-db:
 networks:
   hapi-fhir-network:

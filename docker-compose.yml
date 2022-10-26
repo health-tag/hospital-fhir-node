@@ -50,7 +50,8 @@ services:
       - hapi-fhir-network
 
   hapi-fhir-postgres:
-    image: postgres:14-alpine
+    image: postgres:15-alpine
+    shm_size: 256MB
     container_name: hapi-fhir-postgres
     restart: always
     env_file:
@@ -59,9 +60,16 @@ services:
       - ./hapi-fhir-postgres:/var/lib/postgresql/data
     networks:
       - hapi-fhir-network
+    command: "
+      -c shared_buffers=2GB
+      -c max_wal_size=3GB
+      -c max_connections=100
+      -c max_prepared_transactions=100
+      -c max_locks_per_transaction=128
+      "
 
   db:
-    image: postgres:14-alpine
+    image: postgres:15-alpine
     env_file:
       - .pg.env
     expose:

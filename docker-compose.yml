@@ -34,13 +34,19 @@ services:
       - hapi-fhir-network
 
   hapi-fhir-jpaserver-start:
-    image: "hapiproject/hapi:latest"
+    image: "healthtag/hapi-fhir-jpaserver:latest"
     container_name: hapi-fhir-jpaserver-start
-    environment:
-      - hapi.fhir.bulk_import_enabled=true
-      - hapi.fhir.bulk_export_enabled=true
+    # This configuration is already set in application.yml
+    #environment:
+      #- hapi.fhir.bulk_import_enabled=true
+      #- hapi.fhir.bulk_export_enabled=true
+      #- spring.datasource.url = jdbc:postgresql://hapi-fhir-postgres:5432/hapi
+      #- spring.datasource.username = admin
+      #- spring.datasource.password = admin
+      # spring.datasource.driverClassName = org.postgresql.Driver
+      # spring.jpa.properties.hibernate.dialect = ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect
     volumes:
-      - ./hapi-fhir-server:/data/hapi
+      - ./hapi-data:/data/hapi
     restart: on-failure
     ports:
       - "8080:8080"
@@ -57,7 +63,7 @@ services:
     env_file:
       - .hapipostgres.env
     volumes:
-      - ./hapi-fhir-postgres:/var/lib/postgresql/data
+      - ./postgres-data:/var/lib/postgresql/data
     networks:
       - hapi-fhir-network
     command: "
@@ -72,8 +78,8 @@ services:
     image: postgres:15-alpine
     env_file:
       - .pg.env
-    expose:
-      - 5432
+    #expose:
+    #  - 5432
     networks:
       - hapi-fhir-network
     volumes:
@@ -130,5 +136,6 @@ services:
 
 volumes:
   kong-db:
+  hapi-db:
 networks:
   hapi-fhir-network:

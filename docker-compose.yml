@@ -4,7 +4,7 @@ services:
     image: healthtag/file-uploader
     container_name: file-uploader
     ports:
-      - "8081:3000"
+      - "8888:3000"
     networks:
       - hapi-fhir-network
     restart: on-failure
@@ -43,8 +43,8 @@ services:
       #- spring.datasource.url = jdbc:postgresql://hapi-fhir-postgres:5432/hapi
       #- spring.datasource.username = admin
       #- spring.datasource.password = admin
-      # spring.datasource.driverClassName = org.postgresql.Driver
-      # spring.jpa.properties.hibernate.dialect = ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect
+      #- spring.datasource.driverClassName = org.postgresql.Driver
+      #- spring.jpa.properties.hibernate.dialect = ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect
     volumes:
       - ./hapi-data:/data/hapi
     restart: on-failure
@@ -63,7 +63,7 @@ services:
     env_file:
       - .hapipostgres.env
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - ./hapi-postgres-data:/var/lib/postgresql/data
     networks:
       - hapi-fhir-network
     command: "
@@ -74,44 +74,45 @@ services:
       -c max_locks_per_transaction=128
       "
 
-  db:
+  kong-postgres:
     image: postgres:15-alpine
     env_file:
-      - .pg.env
+      - .kongpostgres.env
     #expose:
     #  - 5432
     networks:
       - hapi-fhir-network
     volumes:
-      - kong-db:/var/lib/postgresql/data
+      - ./kong-postgres-data:/var/lib/postgresql/data
 
   kong:
-    image: kong:latest
+    image: kong/kong-gateway:3.1.0.0-ubuntu
     user: root
     env_file:
-      - .kong.env
+      - .kongpostgres.env
     ports:
       - "8000:8000"
       - "8001:8001"
+      - "8002:8002"
       - "8443:8443"
       - "8444:8444"
     restart: on-failure:5
     depends_on:
-      - db
+      - kong-postgres
     networks:
       - hapi-fhir-network
 
-  konga-prepare:
-    image: leobeckp/konga:0.15.0
-    command: "-c prepare -a postgres -u postgresql://kong:kong@db:5432/konga"
-    networks:
-      - hapi-fhir-network
-    restart: on-failure
-    depends_on:
-      - db
+  #konga-prepare:
+  #  image: leobeckp/konga:0.15.0
+  #  command: "-c prepare -a postgres -u postgresql://kong:kong@db:5432/konga"
+  #  networks:
+  #    - hapi-fhir-network
+  #  restart: on-failure
+  #  depends_on:
+  #    - db
 
   kong-migration:
-    image: ${KONG_DOCKER_TAG:-kong:latest}
+    image: kong/kong-gateway:3.1.0.0-ubuntu
     command: kong migrations bootstrap
     networks:
       - hapi-fhir-network
@@ -119,23 +120,20 @@ services:
     env_file:
       - .kong.env
     depends_on:
-      - db
+      - kong-postgres
 
-  konga:
-    image: leobeckp/konga:0.15.0
-    restart: always
-    networks:
-      - hapi-fhir-network
-    environment:
-      DB_ADAPTER: postgres
-      DB_URI: postgresql://kong:kong@db:5432/konga
-    depends_on:
-      - db
-    ports:
-      - "1337:1337"
+  #konga:
+  #  image: leobeckp/konga:0.15.0
+  #  restart: always
+  #  networks:
+  #    - hapi-fhir-network
+  #  environment:
+  #    DB_ADAPTER: postgres
+  #    DB_URI: postgresql://kong:kong@db:5432/konga
+  #  depends_on:
+  #    - db
+  #  ports:
+  #    - "1337:1337"
 
-volumes:
-  kong-db:
-  hapi-db:
 networks:
   hapi-fhir-network:

@@ -10,6 +10,8 @@ services:
     restart: on-failure
     volumes:
       - ./workingdir:/app/workingdir
+    env_file:
+      - .file-uploader.env
 
   fhir-transformer:
     image: healthtag/fhir-transformer
@@ -36,15 +38,6 @@ services:
   hapi-fhir-jpaserver-start:
     image: "healthtag/hapi-fhir-jpaserver:latest"
     container_name: hapi-fhir-jpaserver-start
-    # This configuration is already set in application.yml
-    #environment:
-      #- hapi.fhir.bulk_import_enabled=true
-      #- hapi.fhir.bulk_export_enabled=true
-      #- spring.datasource.url = jdbc:postgresql://hapi-fhir-postgres:5432/hapi
-      #- spring.datasource.username = admin
-      #- spring.datasource.password = admin
-      #- spring.datasource.driverClassName = org.postgresql.Driver
-      #- spring.jpa.properties.hibernate.dialect = ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect
     volumes:
       - ./hapi-data:/data/hapi
     restart: on-failure
@@ -54,6 +47,8 @@ services:
       - 8080
     networks:
       - hapi-fhir-network
+    env_file:
+      - .hapi.env
 
   hapi-fhir-postgres:
     image: postgres:15-alpine
@@ -61,25 +56,17 @@ services:
     container_name: hapi-fhir-postgres
     restart: always
     env_file:
-      - .hapipostgres.env
+      - .hapi-postgres.env
     volumes:
       - ./hapi-postgres-data:/var/lib/postgresql/data
     networks:
       - hapi-fhir-network
-    command: "
-      -c shared_buffers=2GB
-      -c max_wal_size=3GB
-      -c max_connections=100
-      -c max_prepared_transactions=100
-      -c max_locks_per_transaction=128
-      "
+    command: " -c shared_buffers=2GB -c max_wal_size=3GB -c max_connections=100 -c max_prepared_transactions=100 -c max_locks_per_transaction=128 "
 
   kong-postgres:
     image: postgres:15-alpine
     env_file:
-      - .kongpostgres.env
-    expose:
-      - 5432
+      - .kong-postgres.env
     networks:
       - hapi-fhir-network
     volumes:
@@ -99,18 +86,8 @@ services:
     restart: on-failure:5
     depends_on:
       - kong-postgres
-      - kong-migration
     networks:
       - hapi-fhir-network
-
-  #konga-prepare:
-  #  image: leobeckp/konga:0.15.0
-  #  command: "-c prepare -a postgres -u postgresql://kong:kong@db:5432/konga"
-  #  networks:
-  #    - hapi-fhir-network
-  #  restart: on-failure
-  #  depends_on:
-  #    - db
 
   kong-migration:
     image: kong/kong-gateway:3.1.0.0-ubuntu
@@ -122,19 +99,6 @@ services:
       - .kong.env
     depends_on:
       - kong-postgres
-
-  #konga:
-  #  image: leobeckp/konga:0.15.0
-  #  restart: always
-  #  networks:
-  #    - hapi-fhir-network
-  #  environment:
-  #    DB_ADAPTER: postgres
-  #    DB_URI: postgresql://kong:kong@db:5432/konga
-  #  depends_on:
-  #    - db
-  #  ports:
-  #    - "1337:1337"
 
 networks:
   hapi-fhir-network:

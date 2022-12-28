@@ -1,5 +1,6 @@
-hapi-data
-hapi-postgres-data
 kong-postgres-data
-.idea
+hapi-postgres-data
+hapi-data
 workingdir
+node_modules
+.vscode/settings.json

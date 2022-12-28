@@ -13,6 +13,7 @@ curl --location -g -s -k --request POST 'http://localhost:8001/routes' \
   --header 'Content-Type: application/json' \
   --data-raw '{
     "name": "fhir-api-route",
+    "preserve_host" : true,
     "service": {
       "name": "fhir-api"
     },
@@ -55,6 +56,7 @@ curl --location -g -s -k --request POST 'http://localhost:8001/routes' \
   --header 'Content-Type: application/json' \
   --data-raw '{
     "name": "admin-api-route",
+    "preserve_host" : true,
     "service": {
       "name": "admin-api"
     },
@@ -97,6 +99,7 @@ curl --location -g -s -k --request POST 'http://localhost:8001/routes' \
   --header 'Content-Type: application/json' \
   --data-raw '{
     "name": "fhir-api-key-auth-route",
+    "preserve_host" : true,
     "service": {
       "name": "fhir-api-key-auth"
     },
